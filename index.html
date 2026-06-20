@@ -571,49 +571,29 @@
             btn.classList.add('active');
         }
 
-/* ÚJ: Időpont mentése és ellenőrzése (Múltbéli dátum védelemmel) */
+        /* ÚJ: Időpont mentése és ellenőrzése */
         function handleAppointmentSubmit() {
             const dateVal = document.getElementById('appt-date').value;
             const timeVal = document.getElementById('appt-time').value;
             const noteVal = document.getElementById('appt-note').value.trim();
             const toast = document.getElementById('error-toast');
 
-            let errorMessage = "";
-
-            // 1. Dátum és időpont ellenőrzése
-            if (dateVal && timeVal) {
-                // Összerakjuk a kiválasztott dátumot és időt egy objektummá
-                const selectedDateTime = new Date(`${dateVal}T${timeVal}`);
-                const now = new Date(); // Lekérjük a JELENLEGI pontos időt
-                
-                if (selectedDateTime < now) {
-                    errorMessage = "Korábbi dátumot vagy időpontot nem választhatsz!";
-                }
-            } else if (!dateVal || !timeVal) {
-                errorMessage = "Dátum és időpont megadása kötelező!";
-            }
-
-            // 2. Megjegyzés ellenőrzése (ha a dátummal minden oké volt)
-            if (errorMessage === "" && noteVal === "") {
-                errorMessage = "Hiba az üzenet beírásakor (megjegyzés kötelező)!";
-            }
-
-            // Ha találtunk valamilyen hibát, jöhet a felugró fül
-            if (errorMessage !== "") {
-                toast.innerText = errorMessage; // Belerakjuk a megfelelő hibaüzenetet
+            // Ellenőrzés: ha a megjegyzés üres, jön a modern felső hibaüzenet fül
+            if (noteVal === "") {
                 toast.classList.add('show');
                 setTimeout(() => {
                     toast.classList.remove('show');
                 }, 4000);
             } else {
-                // Ha minden hibátlan, mentés és kártya megjelenítése
-                document.getElementById('embed-date-val').innerText = dateVal;
-                document.getElementById('embed-time-val').innerText = timeVal;
+                // Ha ki van töltve, kiírja a külön embed kártyába lent
+                document.getElementById('embed-date-val').innerText = dateVal ? dateVal : "Nincs kiválasztva dátum";
+                document.getElementById('embed-time-val').innerText = timeVal ? timeVal : "Nincs kiválasztva idő";
                 document.getElementById('embed-note-val').innerText = noteVal;
                 
+                // Embed kártya megjelenítése flex-ként
                 document.getElementById('appointment-embed').style.display = 'flex';
                 
-                // Form kiürítése
+                // Mezők alaphelyzetbe állítása a beküldés után
                 document.getElementById('appt-date').value = '';
                 document.getElementById('appt-time').value = '';
                 document.getElementById('appt-note').value = '';
