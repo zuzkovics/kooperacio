@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kooperáció</title>
+    <style>
+        /* Modern, minimalista alapok szürke-fekete sötét témával */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #0b0c10;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: row; /* Navigáció miatt sor elrendezés */
+            scroll-behavior: smooth;
+        }
+
+        /* ─── ÚJ NAVIGÁCIÓS OLDALSÁV ─── */
+        .sidebar {
+            width: 250px;
+            background: #11141a;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 40px 20px;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #8a99ad;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: #ffb703;
+            color: #0b0c10;
+            border-color: #ffb703;
+        }
+
+        /* Fő tartalom csomagoló (szimulálja az eredeti body elrendezést) */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        /* Szekciók láthatósága */
+        .page-section {
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .page-section.active {
+            display: flex;
+        }
+
+        /* ─── EREDETI STÍLUSOK (MINDEN MEGHAGYVA) ─── */
+        .hero-container {
+            width: 100%;
+            max-width: 900px;
+            background: #11141a;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+            margin-bottom: 50px;
+        }
+
+        .logo-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            width: 100%;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+
+        .logo-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo-item.nni img { height: 120px; width: auto; }
+        .logo-item.honved img { height: 130px; width: auto; }
+        .logo-item.nav img { height: 90px; width: auto; }
+
+        .main-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            color: #ffb703;
+            text-align: center;
+        }
+
+        .team-container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 20px;
+            padding-bottom: 60px;
+        }
+
+        .team-title {
+            font-size: 1.2rem;
+            color: #8a99ad;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .member-row {
+            background: #ffffff;
+            color: #000000;
+            border-radius: 16px;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .member-row:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            background-color: #f8f9fa;
+        }
+
+        .member-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .member-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .member-rank {
+            font-size: 1rem;
+            color: #555555;
+            font-weight: 500;
+        }
+
+        .mini-logo {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .sub-page-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(11, 12, 16, 0.98);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .sub-page-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .sub-page-content {
+            background: #11141a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 50px 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            transform: translateY(30px);
+            transition: transform 0.4s ease;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+
+        .sub-page-overlay.active .sub-page-content {
+            transform: translateY(0);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 2rem;
+            color: #8a99ad;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .close-btn:hover { color: #ffffff; }
+        .profile-logo { height: 100px; width: auto; margin-bottom: 25px; }
+        .profile-name { font-size: 2.5rem; font-weight: 800; margin-bottom: 5px; letter-spacing: 2px; }
+        .profile-title { font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 30px; }
+        
+        .color-honved { color: #4ed964; }
+        .color-nav { color: #ffb300; }
+        .color-nni { color: #00d2ff; }
+
+        .profile-text { font-size: 1.2rem; line-height: 1.8; color: #d1d5db; text-align: justify; }
+
+        /* ─── ÚJ IDŐPONT ŰRLAP ÉS TOAST STÍLUSOK (KICSI, KÖZÉPRE) ─── */
+        .appointment-card {
+            width: 100%;
+            max-width: 450px; /* Kicsi méret */
+            background: #11141a;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .appointment-card h2 {
+            font-size: 1.6rem;
+            color: #ffb703;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-field label {
+            font-size: 0.85rem;
+            color: #8a99ad;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .form-field input, .form-field textarea {
+            background: #1b1f27;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #ffffff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-field input:focus, .form-field textarea:focus {
+            border-color: #ffb703;
+        }
+
+        .form-field textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .submit-btn {
+            background: #ffb703;
+            color: #0b0c10;
+            border: none;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: transform 0.2s, background-color 0.2s;
+            margin-top: 5px;
+        }
+
+        .submit-btn:hover {
+            background: #e5a100;
+            transform: translateY(-2px);
+        }
+
+        /* Külön legenerált Embed Kártya stílus */
+        .appointment-embed {
+            width: 100%;
+            max-width: 450px;
+            background: rgba(255, 183, 3, 0.04);
+            border: 1px solid #ffb703;
+            border-radius: 24px;
+            padding: 30px;
+            margin-top: 30px;
+            display: none; /* Alapból rejtett */
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 15px 40px rgba(255, 183, 3, 0.08);
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .appointment-embed h3 {
+            color: #ffb703;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 183, 3, 0.15);
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+        }
+
+        .embed-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+        }
+
+        .embed-label { color: #8a99ad; }
+        .embed-value { font-weight: 600; color: #ffffff; }
+        
+        .embed-note {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-style: italic;
+            color: #d1d5db;
+            margin-top: 5px;
+            word-break: break-word;
+            border-left: 3px solid #ffb703;
+        }
+
+        /* Modern felül felugró figyelmeztetés (Toast) */
+        .toast-notification {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff4d4d;
+            color: #ffffff;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(255, 77, 77, 0.25);
+            z-index: 1000;
+            transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            letter-spacing: 1px;
+            font-size: 1rem;
+        }
+
+        .toast-notification.show {
+            top: 20px;
+        }
+
+        /* Reszponzivitás mobilon */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.05); flex-direction: row; justify-content: center; padding: 20px; gap: 10px; }
+            .nav-btn { padding: 10px 15px; font-size: 0.9rem; }
+            .logo-item.nni img { height: 90px; }
+            .logo-item.honved img { height: 100px; }
+            .logo-item.nav img { height: 70px; }
+            .main-title { font-size: 2rem; }
+            .member-row { flex-direction: column; text-align: center; gap: 15px; }
+            .sub-page-content { padding: 40px 20px; }
+            .profile-name { font-size: 2rem; }
+            .appointment-card, .appointment-embed { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="error-toast" class="toast-notification">Hiba az üzenet beírásakor</div>
+
+    <div class="sidebar">
+        <button class="nav-btn active" onclick="switchTab('home-section', this)">Kezdőlap</button>
+        <button class="nav-btn" onclick="switchTab('schedule-section', this)">Időpont</button>
+    </div>
+
+    <div class="main-wrapper">
+
+        <div id="home-section" class="page-section active">
+            <div class="hero-container">
+                <div class="logo-row">
+                    <div class="logo-item nni"><img src="nni.jpg" alt="NNI"></div>
+                    <div class="logo-item honved"><img src="honved.jpg" alt="Honvédség"></div>
+                    <div class="logo-item nav"><img src="nav.png" alt="NAV"></div>
+                </div>
+                <h1 class="main-title">Kooperáció</h1>
+            </div>
+
+            <div class="team-container">
+                <h2 class="team-title">Kattints a profilok megtekintéséhez</h2>
+
+                <div class="member-row" onclick="openProfile('zsombor')">
+                    <div class="member-info">
+                        <div class="member-name">Zsombor</div>
+                        <div class="member-rank">HONVÉD - Főhadnagy</div>
+                    </div>
+                    <img src="honved.jpg" class="mini-logo" alt="Honvédség">
+                </div>
+
+                <div class="member-row" onclick="openProfile('aaron')">
+                    <div class="member-info">
+                        <div class="member-name">Aaron</div>
+                        <div class="member-rank">NAV - Zászlós</div>
+                    </div>
+                    <img src="nav.png" class="mini-logo" alt="NAV">
+                </div>
+
+                <div class="member-row" onclick="openProfile('zuzkovics')">
+                    <div class="member-info">
+                        <div class="member-name">zuzkovics</div>
+                        <div class="member-rank">NNI - Törzsőrmester</div>
+                    </div>
+                    <img src="nni.jpg" class="mini-logo" alt="NNI">
+                </div>
+            </div>
+        </div>
+
+        <div id="schedule-section" class="page-section">
+            <div class="appointment-card">
+                <h2>Időpontfoglalás</h2>
+                
+                <div class="form-field">
+                    <label for="appt-date">Dátum</label>
+                    <input type="date" id="appt-date">
+                </div>
+
+                <div class="form-field">
+                    <label for="appt-time">Időpont</label>
+                    <input type="time" id="appt-time">
+                </div>
+                
+                <div class="form-field">
+                    <label for="appt-note">Megjegyzés</label>
+                    <textarea id="appt-note" placeholder="Írj be bármilyen megjegyzést ide..."></textarea>
+                </div>
+                
+                <button class="submit-btn" onclick="handleAppointmentSubmit()">Foglalás mentése</button>
+            </div>
+            
+            <div id="appointment-embed" class="appointment-embed">
+                <h3>Rögzített Időpont Értesítés</h3>
+                <div class="embed-row">
+                    <span class="embed-label">Kiválasztott dátum:</span>
+                    <span id="embed-date-val" class="embed-value">-</span>
+                </div>
+                <div class="embed-row">
+                    <span class="embed-label">Kiválasztott idő:</span>
+                    <span id="embed-time-val" class="embed-value">-</span>
+                </div>
+                <div>
+                    <span class="embed-label">Megjegyzés tartalma:</span>
+                    <div id="embed-note-val" class="embed-note">-</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="md-zsombor" class="sub-page-overlay">
+        <div class="sub-page-content">
+            <span class="close-btn" onclick="closeProfile('zsombor')">&times;</span>
+            <img src="honved.jpg" class="profile-logo" alt="Honvédség">
+            <div class="profile-name">Zsombor</div>
+            <div class="profile-title color-honved">Honvédség - Főhadnagy</div>
+            <p class="profile-text">
+                Zsombor egy nagyon jó fej Főhadnagy, és nagyon jól végzi a dolgát. A taktikai műveletek és a stratégiai tervezés igazi mestere, aki hideg fejjel hozza meg a legjobb döntéseket a legmelegebb helyzetekben is. Mindemellett a csapat moráljáért is ő felel: kiváló humorával és bajtársias hozzáállásával mindig garantálja a jó hangulatot az állományon binnen, miközben fegyelmet és tiszteletet parancsol.
+            </p>
+        </div>
+    </div>
+
+    <div id="md-aaron" class="sub-page-overlay">
+        <div class="sub-page-content">
+            <span class="close-btn" onclick="closeProfile('aaron')">&times;</span>
+            <img src="nav.png" class="profile-logo" alt="NAV">
+            <div class="profile-name">Aaron</div>
+            <div class="profile-title color-nav">NAV - Zászlós</div>
+            <p class="profile-text">
+                Aaron is nagyon cuki, viszont ő még cukibb mint Zsombor, zuzkovics szerelme. Pénzügyi nyomozóként és zászlósként senki sem látja át nála jobban a bonyolult hálózatokat, de a szigora mögött egy hihetetlenül imádnivaló személyiség rejlik. A kooperáció nélkülözhetetlen láncszeme, akiért nem mellesleg odáig van a teljes nyomozóiroda élvonalbeli törzsőrmestere is.
+            </p>
+        </div>
+    </div>
+
+    <div id="md-zuzkovics" class="sub-page-overlay">
+        <div class="sub-page-content">
+            <span class="close-btn" onclick="closeProfile('zuzkovics')">&times;</span>
+            <img src="nni.jpg" class="profile-logo" alt="NNI">
+            <div class="profile-name">zuzkovics</div>
+            <div class="profile-title color-nni">NNI - Törzsőrmester</div>
+            <p class="profile-text">
+                Ő a legcukibb hármuk közül és, szerelmes Zsomborba és Aaronba is. Az NNI elit Törzsőrmestereként nap mint nap komoly bűnügyeket göngyölít fel, de a szíve a legnagyobb gyengéje. Egyszerre képes képviselni a törvény kőkemény öklét és a legaranyosabb, legkedvesebb barátot, aki képtelen választani a Honvédség sármos főhadnagya és a NAV legcukibb zászlósa között – így mindkettejükért egyformán dobog a szíve.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        /* Eredeti modal kezelő függvények */
+        function openProfile(id) {
+            document.getElementById('md-' + id).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeProfile(id) {
+            document.getElementById('md-' + id).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('sub-page-overlay')) {
+                event.target.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        /* ÚJ: Oldalak/Fülek közötti váltás */
+        function switchTab(sectionId, btn) {
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+
+            document.querySelectorAll('.nav-btn').forEach(button => {
+                button.classList.remove('active');
+            });
+            btn.classList.add('active');
+        }
+
+        /* ÚJ: Időpont mentése és ellenőrzése */
+        function handleAppointmentSubmit() {
+            const dateVal = document.getElementById('appt-date').value;
+            const timeVal = document.getElementById('appt-time').value;
+            const noteVal = document.getElementById('appt-note').value.trim();
+            const toast = document.getElementById('error-toast');
+
+            // Ellenőrzés: ha a megjegyzés üres, jön a modern felső hibaüzenet fül
+            if (noteVal === "") {
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 4000);
+            } else {
+                // Ha ki van töltve, kiírja a külön embed kártyába lent
+                document.getElementById('embed-date-val').innerText = dateVal ? dateVal : "Nincs kiválasztva dátum";
+                document.getElementById('embed-time-val').innerText = timeVal ? timeVal : "Nincs kiválasztva idő";
+                document.getElementById('embed-note-val').innerText = noteVal;
+                
+                // Embed kártya megjelenítése flex-ként
+                document.getElementById('appointment-embed').style.display = 'flex';
+                
+                // Mezők alaphelyzetbe állítása a beküldés után
+                document.getElementById('appt-date').value = '';
+                document.getElementById('appt-time').value = '';
+                document.getElementById('appt-note').value = '';
+            }
+        }
+    </script>
+
+</body>
+</html>
