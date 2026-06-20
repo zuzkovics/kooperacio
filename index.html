@@ -22,7 +22,61 @@
             scroll-behavior: smooth;
         }
 
-        /* ─── ÚJ NAVIGÁCIÓS OLDALSÁV ─── */
+        /* ─── BEJELENTKEZŐ ÉS REGISZTRÁCIÓS KÉPERNYŐ STÍLUSOK ─── */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0b0c10;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+
+        .login-card {
+            background: #11141a;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 50px 40px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transform: translateY(0);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-card h2 {
+            color: #ffb703;
+            text-align: center;
+            font-size: 1.8rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .login-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .login-logos img { height: 40px; width: auto; }
+
+        /* ─── NAVIGÁCIÓS OLDALSÁV ─── */
         .sidebar {
             width: 250px;
             background: #11141a;
@@ -55,7 +109,7 @@
             border-color: #ffb703;
         }
 
-        /* Fő tartalom csomagoló (szimulálja az eredeti body elrendezést) */
+        /* Fő tartalom csomagoló */
         .main-wrapper {
             flex: 1;
             display: flex;
@@ -74,11 +128,9 @@
             align-items: center;
         }
 
-        .page-section.active {
-            display: flex;
-        }
+        .page-section.active { display: flex; }
 
-        /* ─── EREDETI STÍLUSOK (MINDEN MEGHAGYVA) ─── */
+        /* ─── HŐS/BANNER KONTÉNER ─── */
         .hero-container {
             width: 100%;
             max-width: 900px;
@@ -103,12 +155,7 @@
             flex-wrap: wrap;
         }
 
-        .logo-item {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
+        .logo-item { display: flex; justify-content: center; align-items: center; }
         .logo-item.nni img { height: 120px; width: auto; }
         .logo-item.honved img { height: 130px; width: auto; }
         .logo-item.nav img { height: 90px; width: auto; }
@@ -122,6 +169,7 @@
             text-align: center;
         }
 
+        /* CSAPATTAGOK */
         .team-container {
             width: 100%;
             max-width: 900px;
@@ -160,81 +208,37 @@
             background-color: #f8f9fa;
         }
 
-        .member-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
+        .member-info { display: flex; flex-direction: column; gap: 4px; }
+        .member-name { font-size: 1.4rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .member-rank { font-size: 1rem; color: #555555; font-weight: 500; }
+        .mini-logo { height: 40px; width: auto; object-fit: contain; }
 
-        .member-name {
-            font-size: 1.4rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .member-rank {
-            font-size: 1rem;
-            color: #555555;
-            font-weight: 500;
-        }
-
-        .mini-logo {
-            height: 40px;
-            width: auto;
-            object-fit: contain;
-        }
-
+        /* PROFIL MODAL MODERNEK */
         .sub-page-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(11, 12, 16, 0.98);
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(11, 12, 16, 0.98); z-index: 100;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
         }
 
-        .sub-page-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .sub-page-overlay.active { opacity: 1; pointer-events: auto; }
 
         .sub-page-content {
-            background: #11141a;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 50px 40px;
-            max-width: 600px;
-            width: 90%;
-            text-align: center;
-            position: relative;
-            transform: translateY(30px);
-            transition: transform 0.4s ease;
+            background: #11141a; border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px; padding: 50px 40px; max-width: 600px; width: 90%;
+            text-align: center; position: relative;
+            transform: translateY(30px); transition: transform 0.4s ease;
             box-shadow: 0 20px 50px rgba(0,0,0,0.6);
         }
 
-        .sub-page-overlay.active .sub-page-content {
-            transform: translateY(0);
-        }
+        .sub-page-overlay.active .sub-page-content { transform: translateY(0); }
 
         .close-btn {
-            position: absolute;
-            top: 20px;
-            right: 25px;
-            font-size: 2rem;
-            color: #8a99ad;
-            cursor: pointer;
-            transition: color 0.2s ease;
+            position: absolute; top: 20px; right: 25px; font-size: 2rem;
+            color: #8a99ad; cursor: pointer; transition: color 0.2s ease;
         }
-
         .close-btn:hover { color: #ffffff; }
+
         .profile-logo { height: 100px; width: auto; margin-bottom: 25px; }
         .profile-name { font-size: 2.5rem; font-weight: 800; margin-bottom: 5px; letter-spacing: 2px; }
         .profile-title { font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 30px; }
@@ -245,158 +249,64 @@
 
         .profile-text { font-size: 1.2rem; line-height: 1.8; color: #d1d5db; text-align: justify; }
 
-        /* ─── ÚJ IDŐPONT ŰRLAP ÉS TOAST STÍLUSOK (KICSI, KÖZÉPRE) ─── */
-        .appointment-card {
-            width: 100%;
-            max-width: 450px; /* Kicsi méret */
-            background: #11141a;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            padding: 40px 30px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .appointment-card h2 {
-            font-size: 1.6rem;
-            color: #ffb703;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            text-align: center;
-            margin-bottom: 5px;
-        }
-
-        .form-field {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-field label {
-            font-size: 0.85rem;
-            color: #8a99ad;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
+        /* ŰRLAP MEZŐK (Közös stílus) */
+        .form-field { display: flex; flex-direction: column; gap: 8px; }
+        .form-field label { font-size: 0.85rem; color: #8a99ad; text-transform: uppercase; letter-spacing: 2px; }
         .form-field input, .form-field textarea {
-            background: #1b1f27;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px 16px;
-            color: #ffffff;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
+            background: #1b1f27; border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; padding: 12px 16px; color: #ffffff;
+            font-size: 1rem; outline: none; transition: border-color 0.2s;
         }
-
-        .form-field input:focus, .form-field textarea:focus {
-            border-color: #ffb703;
-        }
-
-        .form-field textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
+        .form-field input:focus, .form-field textarea:focus { border-color: #ffb703; }
+        .form-field textarea { resize: vertical; min-height: 100px; }
 
         .submit-btn {
-            background: #ffb703;
-            color: #0b0c10;
-            border: none;
-            border-radius: 12px;
-            padding: 15px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: transform 0.2s, background-color 0.2s;
-            margin-top: 5px;
+            background: #ffb703; color: #0b0c10; border: none; border-radius: 12px;
+            padding: 15px; font-size: 1.1rem; font-weight: 700; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 2px;
+            transition: transform 0.2s, background-color 0.2s; margin-top: 10px;
         }
+        .submit-btn:hover { background: #e5a100; transform: translateY(-2px); }
 
-        .submit-btn:hover {
-            background: #e5a100;
-            transform: translateY(-2px);
+        /* IDŐPONT KÁRTYÁK */
+        .appointment-card {
+            width: 100%; max-width: 450px; background: #11141a;
+            border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px;
+            padding: 40px 30px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+            display: flex; flex-direction: column; gap: 20px; margin-top: 20px;
         }
+        .appointment-card h2 { font-size: 1.6rem; color: #ffb703; letter-spacing: 2px; text-transform: uppercase; text-align: center; margin-bottom: 5px; }
 
-        /* Külön legenerált Embed Kártya stílus */
+        /* Embed Értesítő Panel */
         .appointment-embed {
-            width: 100%;
-            max-width: 450px;
-            background: rgba(255, 183, 3, 0.04);
-            border: 1px solid #ffb703;
-            border-radius: 24px;
-            padding: 30px;
-            margin-top: 30px;
-            display: none; /* Alapból rejtett */
-            flex-direction: column;
-            gap: 15px;
+            width: 100%; max-width: 450px; background: rgba(255, 183, 3, 0.04);
+            border: 1px solid #ffb703; border-radius: 24px; padding: 30px;
+            margin-top: 30px; display: none; flex-direction: column; gap: 15px;
             box-shadow: 0 15px 40px rgba(255, 183, 3, 0.08);
             animation: fadeIn 0.4s ease forwards;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .appointment-embed h3 {
-            color: #ffb703;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 183, 3, 0.15);
-            padding-bottom: 10px;
-            margin-bottom: 5px;
-        }
-
-        .embed-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.95rem;
-        }
-
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .appointment-embed h3 { color: #ffb703; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; text-align: center; border-bottom: 1px solid rgba(255, 183, 3, 0.15); padding-bottom: 10px; margin-bottom: 5px; }
+        .embed-row { display: flex; justify-content: space-between; font-size: 0.95rem; }
         .embed-label { color: #8a99ad; }
         .embed-value { font-weight: 600; color: #ffffff; }
-        
         .embed-note {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-style: italic;
-            color: #d1d5db;
-            margin-top: 5px;
-            word-break: break-word;
-            border-left: 3px solid #ffb703;
+            background: rgba(255, 255, 255, 0.03); padding: 12px 16px; border-radius: 12px;
+            font-style: italic; color: #d1d5db; margin-top: 5px; word-break: break-word; border-left: 3px solid #ffb703;
         }
 
-        /* Modern felül felugró figyelmeztetés (Toast) */
+        /* TOAST (FELUGRÓ ÉRTESÍTÉSEK) */
         .toast-notification {
-            position: fixed;
-            top: -100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ff4d4d;
-            color: #ffffff;
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-weight: 600;
-            box-shadow: 0 10px 30px rgba(255, 77, 77, 0.25);
-            z-index: 1000;
-            transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            letter-spacing: 1px;
-            font-size: 1rem;
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background: #ff4d4d; color: #ffffff; padding: 16px 32px;
+            border-radius: 12px; font-weight: 600; box-shadow: 0 10px 30px rgba(255, 77, 77, 0.25);
+            z-index: 10000; transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s;
+            letter-spacing: 1px; font-size: 1rem; text-align: center;
         }
+        .toast-notification.show { top: 20px; }
 
-        .toast-notification.show {
-            top: 20px;
-        }
-
-        /* Reszponzivitás mobilon */
+        /* Mobil nézet optimalizáció */
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.05); flex-direction: row; justify-content: center; padding: 20px; gap: 10px; }
@@ -414,7 +324,59 @@
 </head>
 <body>
 
-    <div id="error-toast" class="toast-notification">Hiba az üzenet beírásakor</div>
+    <div id="error-toast" class="toast-notification">Hiba!</div>
+
+    <div id="login-overlay">
+        
+        <div class="login-card" id="login-card">
+            <div class="login-logos">
+                <img src="nni.jpg" alt="NNI">
+                <img src="honved.jpg" alt="Honvédség" style="height: 45px;">
+                <img src="nav.png" alt="NAV">
+            </div>
+            <h2>Bejelentkezés</h2>
+            
+            <div class="form-field">
+                <label for="login-username">Felhasználónév</label>
+                <input type="text" id="login-username" placeholder="Felhasználónév">
+            </div>
+            
+            <div class="form-field">
+                <label for="login-password">Jelszó</label>
+                <input type="password" id="login-password" placeholder="Jelszó">
+            </div>
+            
+            <button class="submit-btn" onclick="handleLogin()">Belépés</button>
+            <p style="text-align: center; color: #8a99ad; font-size: 0.9rem; margin-top: 5px;">
+                Nincs még fiókod? <a href="#" onclick="toggleAuthView('register')" style="color: #ffb703; text-decoration: none; font-weight: bold;">Regisztrálj itt!</a>
+            </p>
+        </div>
+
+        <div class="login-card" id="register-card" style="display: none;">
+            <div class="login-logos">
+                <img src="nni.jpg" alt="NNI">
+                <img src="honved.jpg" alt="Honvédség" style="height: 45px;">
+                <img src="nav.png" alt="NAV">
+            </div>
+            <h2>Regisztráció</h2>
+            
+            <div class="form-field">
+                <label for="reg-username">Új Felhasználónév</label>
+                <input type="text" id="reg-username" placeholder="Válassz egy nevet">
+            </div>
+            
+            <div class="form-field">
+                <label for="reg-password">Új Jelszó</label>
+                <input type="password" id="reg-password" placeholder="Válassz egy jelszót">
+            </div>
+            
+            <button class="submit-btn" onclick="handleRegister()">Fiók létrehozása</button>
+            <p style="text-align: center; color: #8a99ad; font-size: 0.9rem; margin-top: 5px;">
+                Már van fiókod? <a href="#" onclick="toggleAuthView('login')" style="color: #ffb703; text-decoration: none; font-weight: bold;">Jelentkezz be!</a>
+            </p>
+        </div>
+
+    </div>
 
     <div class="sidebar">
         <button class="nav-btn active" onclick="switchTab('home-section', this)">Kezdőlap</button>
@@ -510,7 +472,7 @@
             <div class="profile-name">Zsombor</div>
             <div class="profile-title color-honved">Honvédség - Főhadnagy</div>
             <p class="profile-text">
-                Zsombor egy nagyon jó fej Főhadnagy, és nagyon jól végzi a dolgát. A taktikai műveletek és a stratégiai tervezés igazi mestere, aki hideg fejjel hozza meg a legjobb döntéseket a legmelegebb helyzetekben is. Mindemellett a csapat moráljáért is ő felel: kiváló humorával és bajtársias hozzáállásával mindig garantálja a jó hangulatot az állományon binnen, miközben fegyelmet és tiszteletet parancsol.
+                Zsombor egy nagyon jó fej Főhadnagy, és nagyon jól végzi a dolgát. A taktikai műveletek és a stratégiai tervezés igazi mestere, kai hideg fejjel hozza meg a legjobb döntéseket a legmelegebb helyzetekben is. Mindemellett a csapat moráljáért is ő felel: kiváló humorával és bajtársias hozzáállásával mindig garantálja a jó hangulatot az állományon binnen, miközben fegyelmet és tiszteletet parancsol.
             </p>
         </div>
     </div>
@@ -540,7 +502,84 @@
     </div>
 
     <script>
-        /* Eredeti modal kezelő függvények */
+        /* ─── HIBAMEGJELENÍTŐ KÖZÖS TOAST FUNKCIÓ ─── */
+        function triggerToast(message, isSuccess = false) {
+            const toast = document.getElementById('error-toast');
+            toast.innerText = message;
+            
+            if (isSuccess) {
+                toast.style.backgroundColor = "#4ed964"; // Zöld szín siker esetén
+            } else {
+                toast.style.backgroundColor = "#ff4d4d"; // Piros szín hiba esetén
+            }
+            
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 4000);
+        }
+
+        /* ─── BEJELENTKEZÉS ÉS REGISZTRÁCIÓ VÁLTÓ ─── */
+        function toggleAuthView(view) {
+            if (view === 'register') {
+                document.getElementById('login-card').style.display = 'none';
+                document.getElementById('register-card').style.display = 'flex';
+            } else {
+                document.getElementById('login-card').style.display = 'flex';
+                document.getElementById('register-card').style.display = 'none';
+            }
+        }
+
+        /* ─── REGISZTRÁCIÓS LOGIKA (localStorage) ─── */
+        function handleRegister() {
+            const userVal = document.getElementById('reg-username').value.trim();
+            const passVal = document.getElementById('reg-password').value;
+
+            if (userVal === "" || passVal === "") {
+                triggerToast("Hiba: Minden mezőt ki kell tölteni!");
+                return;
+            }
+
+            // Lekérjük a már korábban regisztrált felhasználókat
+            let registeredUsers = JSON.parse(localStorage.getItem('coop_users')) || {};
+
+            // Ellenőrizzük, hogy létezik-e már a név, vagy ütközik-e a beépített adminnal
+            if (registeredUsers[userVal] || userVal.toLowerCase() === "admin") {
+                triggerToast("Hiba: Ez a felhasználónév már foglalt!");
+                return;
+            }
+
+            // Mentés az adatbázisba (localStorage)
+            registeredUsers[userVal] = passVal;
+            localStorage.setItem('coop_users', JSON.stringify(registeredUsers));
+
+            triggerToast("Sikeres regisztráció! Most már bejelentkezhetsz.", true);
+            
+            // Mezők ürítése és visszaváltás a loginra
+            document.getElementById('reg-username').value = '';
+            document.getElementById('reg-password').value = '';
+            toggleAuthView('login');
+        }
+
+        /* ─── BEJELENTKEZÉSI LOGIKA ─── */
+        function handleLogin() {
+            const userVal = document.getElementById('login-username').value.trim();
+            const passVal = document.getElementById('login-password').value;
+
+            // Lekérjük az eltárolt regisztráltakat
+            let registeredUsers = JSON.parse(localStorage.getItem('coop_users')) || {};
+
+            // Ellenőrzés: alap admin fiók VAGY a regisztráltak között pontos egyezés
+            if ((userVal === "admin" && passVal === "1234") || (registeredUsers[userVal] && registeredUsers[userVal] === passVal)) {
+                const overlay = document.getElementById('login-overlay');
+                overlay.style.opacity = '0'; // Halványítás
+                setTimeout(() => {
+                    overlay.style.visibility = 'hidden'; // Eltüntetés
+                }, 500);
+            } else {
+                triggerToast("Hiba: Helytelen felhasználónév vagy jelszó!");
+            }
+        }
+
+        /* ─── PROFIL MODALOK ─── */
         function openProfile(id) {
             document.getElementById('md-' + id).classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -558,7 +597,7 @@
             }
         }
 
-        /* ÚJ: Oldalak/Fülek közötti váltás */
+        /* ─── TABS / OLDALAK KÖZÖTTI VÁLTÁS ─── */
         function switchTab(sectionId, btn) {
             document.querySelectorAll('.page-section').forEach(section => {
                 section.classList.remove('active');
@@ -571,29 +610,38 @@
             btn.classList.add('active');
         }
 
-        /* ÚJ: Időpont mentése és ellenőrzése */
+        /* ─── IDŐPONT FOGLALÁS (MÚLTBÉLI DÁTUM VÉDELEMMEL) ─── */
         function handleAppointmentSubmit() {
             const dateVal = document.getElementById('appt-date').value;
             const timeVal = document.getElementById('appt-time').value;
             const noteVal = document.getElementById('appt-note').value.trim();
-            const toast = document.getElementById('error-toast');
 
-            // Ellenőrzés: ha a megjegyzés üres, jön a modern felső hibaüzenet fül
-            if (noteVal === "") {
-                toast.classList.add('show');
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 4000);
+            let errorMessage = "";
+
+            if (dateVal && timeVal) {
+                const selectedDateTime = new Date(`${dateVal}T${timeVal}`);
+                const now = new Date();
+                
+                if (selectedDateTime < now) {
+                    errorMessage = "Hiba: Korábbi dátumot vagy időpontot nem választhatsz!";
+                }
+            } else if (!dateVal || !timeVal) {
+                errorMessage = "Hiba: Dátum és időpont megadása kötelező!";
+            }
+
+            if (errorMessage === "" && noteVal === "") {
+                errorMessage = "Hiba az üzenet beírásakor (megjegyzés kötelező)!";
+            }
+
+            if (errorMessage !== "") {
+                triggerToast(errorMessage);
             } else {
-                // Ha ki van töltve, kiírja a külön embed kártyába lent
-                document.getElementById('embed-date-val').innerText = dateVal ? dateVal : "Nincs kiválasztva dátum";
-                document.getElementById('embed-time-val').innerText = timeVal ? timeVal : "Nincs kiválasztva idő";
+                document.getElementById('embed-date-val').innerText = dateVal;
+                document.getElementById('embed-time-val').innerText = timeVal;
                 document.getElementById('embed-note-val').innerText = noteVal;
                 
-                // Embed kártya megjelenítése flex-ként
                 document.getElementById('appointment-embed').style.display = 'flex';
                 
-                // Mezők alaphelyzetbe állítása a beküldés után
                 document.getElementById('appt-date').value = '';
                 document.getElementById('appt-time').value = '';
                 document.getElementById('appt-note').value = '';
