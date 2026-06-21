@@ -4,54 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kooperáció</title>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
-        /* ─── TÉMA VÁLTOZÓK ─── */
+        /* ─── TÉMA VÁLTOZÓK (Sötét/Világos mód támogatással) ─── */
         :root {
-    --accent-color: #ffb703;
-    --bg-color: #0b0c10;
-    --card-bg: #11141a;
-    --text-color: #ffffff;
-    --member-row-bg: #ffffff;
-    --input-bg: #1b1f27;
-}
+            --accent-color: #ffb703;
+            --bg-color: #0b0c10;
+            --card-bg: #11141a;
+            --text-color: #ffffff;
+            --member-row-bg: rgba(255, 255, 255, 0.05);
+            --input-bg: #1b1f27;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+        /* Ez a kód gondoskodik a gombok hover effektjéről */
+        .nav-btn:hover {
+            background-color: var(--accent-color) !important;
+            color: #0b0c10 !important;
+            border-color: var(--accent-color) !important;
+        }
+        
+/* A "Világos/Sötét Mód" és "Kijelentkezés" gomb igazítása */
+        #theme-toggle { margin-top: auto; } /* Ez tolja le a kijelentkezést alulra */
+        
+        #theme-toggle:hover {
+            background-color: var(--accent-color) !important;
+            color: #0b0c10 !important;
+        }
 
-[data-theme="light"] {
-    --accent-color: #e67e22;
-    --bg-color: #f4f4f9;
-    --card-bg: #ffffff;
-    --text-color: #333333;
-    --member-row-bg: #ebebeb;
-    --input-bg: #e0e0e0;
-}
-
-/* Ezt a szabályt add hozzá a CSS-hez, hogy minden elem kövesse a témát */
-body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    transition: background 0.3s, color 0.3s;
-}
+        [data-theme="light"] {
+            --accent-color: #e67e22;
+            --bg-color: #f4f4f9;
+            --card-bg: #ffffff;
+            --text-color: #11141a;
+            --member-row-bg: #ffffff;
+            --input-bg: #f4f4f9;
+            --border-color: rgba(0, 0, 0, 0.1);
+        }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: row; 
+            scroll-behavior: smooth; 
+            transition: background 0.3s, color 0.3s; 
+        }
 
         .editable { transition: outline 0.2s, background-color 0.2s; }
         .editable-active { outline: 2px dashed var(--accent-color) !important; padding: 5px; background-color: rgba(255, 255, 255, 0.05); border-radius: 5px; }
         img.editable-active { cursor: pointer; border: 3px dashed #ff4d4d !important; opacity: 0.8; }
 
-        body { background-color: var(--bg-color); color: #ffffff; min-height: 100vh; display: flex; flex-direction: row; scroll-behavior: smooth; }
-
         /* ─── BEJELENTKEZŐ KÉPERNYŐ ─── */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease, visibility 0.5s; }
-        .login-card { background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; padding: 50px 40px; width: 90%; max-width: 420px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; gap: 20px; animation: slideUp 0.5s ease-out; }
+        .login-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 50px 40px; width: 90%; max-width: 420px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; gap: 20px; animation: slideUp 0.5s ease-out; transition: background 0.3s; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         .login-card h2 { color: var(--accent-color); text-align: center; font-size: 1.8rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
         .login-logos { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px; }
         .login-logos img { height: 40px; width: auto; object-fit: contain; }
 
-        /* ─── NAVIGÁCIÓ ─── */
-        .sidebar { width: 250px; background: var(--card-bg); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; padding: 40px 20px; gap: 15px; flex-shrink: 0; z-index: 10; }
-        .nav-btn { background: transparent; border: 1px solid rgba(255, 255, 255, 0.08); color: #8a99ad; padding: 14px 20px; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 2px; }
+    /* ─── OLDALSÁV JAVÍTÁS ─── */
+        .sidebar { 
+            width: 250px; 
+            background: var(--card-bg); 
+            border-right: 1px solid var(--border-color); 
+            display: flex; 
+            flex-direction: column; 
+            padding: 20px; /* Kicsit csökkentettük a paddingot */
+            gap: 10px;    /* Egységes távolság a gombok között */
+            flex-shrink: 0; 
+            transition: background 0.3s; 
+        }
+        .nav-btn { 
+            background: transparent; 
+            border: 1px solid var(--border-color); 
+            color: var(--text-color); 
+            padding: 14px 20px; 
+            border-radius: 12px; 
+            font-size: 1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            text-align: left; 
+            transition: all 0.2s ease; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            margin: 0; /* Fontos: nulla margó, hogy a gap kezelje a távolságot */
+        }
         .nav-btn:hover, .nav-btn.active { background: var(--accent-color); color: #0b0c10; border-color: var(--accent-color); }
-        #admin-nav-btn { color: var(--accent-color); border-color: var(--accent-color); margin-top: auto; }
+/* Az admin gomb igazítása */
+        #admin-nav-btn { 
+            color: var(--accent-color); 
+            border-color: var(--accent-color); 
+            margin-top: 10px; /* Fix távolság, ne auto */
+        }
         #admin-nav-btn:hover, #admin-nav-btn.active { background: var(--accent-color) !important; color: #0b0c10 !important; }
 
         .main-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 20px; overflow-y: auto; position: relative; }
@@ -60,12 +110,12 @@ body {
 
         /* ─── FELHASZNÁLÓI PROFIL WIDGET ─── */
         .user-widget-container { width: 100%; max-width: 900px; display: none; justify-content: flex-end; align-items: center; margin-bottom: 20px; gap: 15px; }
-        .user-widget-name { font-weight: 600; font-size: 1.1rem; letter-spacing: 1px; color: #ffffff; }
+        .user-widget-name, #display-widget-name { font-weight: 600 !important; font-size: 1.1rem !important; letter-spacing: 1px !important; color: var(--text-color) !important; transition: color 0.3s ease !important; }
         .user-widget-pfp { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-color); cursor: pointer; transition: transform 0.2s; }
         .user-widget-pfp:hover { transform: scale(1.05); }
 
         /* ─── TARTALOM ÉS CSAPAT ─── */
-        .hero-container { width: 100%; max-width: 900px; background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; padding: 60px 40px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4); margin-bottom: 50px; }
+        .hero-container { width: 100%; max-width: 900px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 60px 40px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4); margin-bottom: 50px; transition: background 0.3s; }
         .logo-row { display: flex; justify-content: center; align-items: center; gap: 40px; width: 100%; margin-bottom: 50px; flex-wrap: wrap; }
         .logo-item { display: flex; justify-content: center; align-items: center; }
         .logo-item.nni img { height: 120px; width: auto; object-fit: contain; }
@@ -76,37 +126,44 @@ body {
         .team-container { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 16px; margin-top: 20px; padding-bottom: 60px; }
         .team-title { font-size: 1.2rem; color: #8a99ad; text-transform: uppercase; letter-spacing: 4px; text-align: center; margin-bottom: 20px; }
         #team-list-container { display: flex; flex-direction: column; gap: 16px; width: 100%; }
-        .member-row { background: #ffffff; color: #000000; border-radius: 16px; padding: 20px 30px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease; cursor: pointer; }
-        .member-row:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); background-color: #f8f9fa; }
+        
+        .member-row { background: var(--member-row-bg); color: var(--text-color); border-radius: 16px; padding: 20px 30px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease; cursor: pointer; border: 1px solid var(--border-color); }
+        .member-row:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); filter: brightness(1.1); }
         .member-info { display: flex; flex-direction: column; gap: 4px; }
         .member-name { font-size: 1.4rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-        .member-rank { font-size: 1rem; color: #555555; font-weight: 500; }
+        .member-rank { font-size: 1rem; color: #8a99ad; font-weight: 500; }
         .mini-logo { height: 40px; width: auto; max-width: 50px; object-fit: contain; }
 
         /* ─── MODALOK ─── */
-        .sub-page-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(11, 12, 16, 0.98); z-index: 100; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+        .sub-page-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); z-index: 100; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; backdrop-filter: blur(5px); }
         .sub-page-overlay.active { opacity: 1; pointer-events: auto; }
-        .sub-page-content { background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 50px 40px; max-width: 600px; width: 90%; text-align: center; position: relative; transform: translateY(30px); transition: transform 0.4s ease; box-shadow: 0 20px 50px rgba(0,0,0,0.6); max-height: 90vh; overflow-y: auto; }
+        .sub-page-content { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 50px 40px; max-width: 600px; width: 90%; text-align: center; position: relative; transform: translateY(30px); transition: transform 0.4s ease, background 0.3s; box-shadow: 0 20px 50px rgba(0,0,0,0.6); max-height: 90vh; overflow-y: auto; color: var(--text-color); }
         .sub-page-overlay.active .sub-page-content { transform: translateY(0); }
         .close-btn { position: absolute; top: 20px; right: 25px; font-size: 2rem; color: #8a99ad; cursor: pointer; transition: color 0.2s ease; }
-        .close-btn:hover { color: #ffffff; }
+        .close-btn:hover { color: var(--accent-color); }
         .profile-logo { height: 100px; width: auto; max-width: 120px; margin-bottom: 25px; object-fit: contain; }
-        .profile-name { font-size: 2.5rem; font-weight: 800; margin-bottom: 5px; letter-spacing: 2px; }
+        .profile-name { font-size: 2.5rem; font-weight: 800; margin-bottom: 5px; letter-spacing: 2px; color: var(--text-color); }
         .profile-title { font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 30px; }
-        .profile-text { font-size: 1.2rem; line-height: 1.8; color: #d1d5db; text-align: justify; }
+        .profile-text { font-size: 1.2rem; line-height: 1.8; color: var(--text-color); opacity: 0.9; text-align: justify; }
         .delete-member-btn { display: none; background: #ff4d4d; color: white; border: none; padding: 12px 20px; border-radius: 12px; margin-top: 20px; cursor: pointer; font-weight: bold; width: 100%; text-transform: uppercase; }
 
         /* ─── ŰRLAPOK ÉS GOMBOK ─── */
         .form-field { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-bottom: 15px; text-align: left; }
         .form-field label { font-size: 0.85rem; color: #8a99ad; text-transform: uppercase; letter-spacing: 2px; }
-        .form-input { background: #1b1f27; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px 16px; color: #ffffff; font-size: 1rem; outline: none; transition: border-color 0.2s; width: 100%; }
+        
+        .form-input { 
+            background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 16px; 
+            color: var(--text-color); font-size: 1rem; outline: none; transition: border-color 0.2s, background 0.3s, color 0.3s; width: 100%; 
+        }
         .form-input:focus { border-color: var(--accent-color); }
+        .form-input option { background: var(--card-bg); color: var(--text-color); }
         textarea.form-input { resize: vertical; min-height: 100px; }
+        
         .submit-btn { background: var(--accent-color); color: #0b0c10; border: none; border-radius: 12px; padding: 15px; font-size: 1.1rem; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: transform 0.2s, filter 0.2s; margin-top: 10px; width: 100%; }
         .submit-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
         /* ─── IDŐPONT ─── */
-        .appointment-card { width: 100%; max-width: 450px; background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; padding: 40px 30px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .appointment-card { width: 100%; max-width: 450px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 40px 30px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         .appointment-card h2 { font-size: 1.6rem; color: var(--accent-color); letter-spacing: 2px; text-transform: uppercase; text-align: center; margin-bottom: 15px; }
         
         .appointment-embed { width: 100%; background: rgba(255, 183, 3, 0.04); border: 1px solid var(--accent-color); border-radius: 24px; padding: 30px; margin-top: 30px; display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.4s ease forwards; }
@@ -114,14 +171,14 @@ body {
         .appointment-embed h3 { color: var(--accent-color); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; text-align: center; border-bottom: 1px solid rgba(255, 183, 3, 0.15); padding-bottom: 10px; margin-bottom: 5px; }
         .embed-row { display: flex; justify-content: space-between; font-size: 0.95rem; }
         .embed-label { color: #8a99ad; }
-        .embed-value { font-weight: 600; color: #ffffff; }
-        .embed-note { background: rgba(255, 255, 255, 0.03); padding: 12px 16px; border-radius: 12px; font-style: italic; color: #d1d5db; margin-top: 5px; word-break: break-word; border-left: 3px solid var(--accent-color); }
+        .embed-value { font-weight: 600; color: var(--text-color); }
+        .embed-note { background: rgba(128, 128, 128, 0.05); padding: 12px 16px; border-radius: 12px; font-style: italic; color: var(--text-color); opacity: 0.8; margin-top: 5px; word-break: break-word; border-left: 3px solid var(--accent-color); }
 
         /* ─── TOAST (ÉRTESÍTÉS) ─── */
         .toast-notification { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #ff4d4d; color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 600; box-shadow: 0 10px 30px rgba(255, 77, 77, 0.25); z-index: 10000; transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s; letter-spacing: 1px; font-size: 1rem; text-align: center; }
         .toast-notification.show { top: 20px; }
 
-        @media (max-width: 768px) { body { flex-direction: column; } .sidebar { width: 100%; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.05); flex-direction: row; justify-content: center; padding: 20px; gap: 10px; flex-wrap: wrap; } .nav-btn { padding: 10px 15px; font-size: 0.9rem; margin-top: 0 !important; } }
+        @media (max-width: 768px) { body { flex-direction: column; } .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); flex-direction: row; justify-content: center; padding: 20px; gap: 10px; flex-wrap: wrap; } .nav-btn { padding: 10px 15px; font-size: 0.9rem; margin-top: 0 !important; } }
     </style>
 </head>
 <body data-theme="dark">
@@ -151,9 +208,9 @@ body {
         <button class="nav-btn active" onclick="switchTab('home-section', this)">Kezdőlap</button>
         <button class="nav-btn" onclick="switchTab('schedule-section', this)">Időpont</button>
         <button class="nav-btn" onclick="switchTab('users-section', this)">Taglista</button>
-        <button class="nav-btn" onclick="toggleTheme()" id="theme-toggle">Világos/Sötét Mód</button>
         <button class="nav-btn" id="admin-nav-btn" onclick="switchTab('admin-section', this)" style="display:none;">Admin Panel</button>
-        <button class="nav-btn" onclick="handleLogout()" style="color: #ff4d4d; border-color: #ff4d4d; margin-top: 10px;">Kijelentkezés</button>
+        <button class="nav-btn" onclick="toggleTheme()" id="theme-toggle" style="margin-top: 10px; border-color: var(--accent-color); color: var(--accent-color);">Világos/Sötét Mód</button>
+        <button class="nav-btn" onclick="handleLogout()" style="color: #ff4d4d; border-color: #ff4d4d; margin-top: auto;">Kijelentkezés</button>
     </div>
 
     <div class="main-wrapper">
@@ -170,8 +227,7 @@ body {
                 <div class="form-field" style="margin-top: 20px;">
                     <label>Tagok Rangjának Kezelése</label>
                     <div style="display: flex; gap: 10px; margin-bottom: 5px;">
-                        <select id="admin-role-user" class="form-input" style="flex: 1;">
-                            </select>
+                        <select id="admin-role-user" class="form-input" style="flex: 1;"></select>
                         <select id="admin-role-select" class="form-input" style="flex: 1;">
                             <option value="">Felhasználó (Minden rang törlése)</option>
                             <option value="admin">Admin (Teljes jog)</option>
@@ -185,7 +241,7 @@ body {
                     <button class="submit-btn" style="margin-top: 0;" onclick="assignRole()">Rang Kiosztása / Elvétele</button>
                 </div>
 
-                <hr style="border-color: rgba(255,255,255,0.05); margin: 20px 0;">
+                <hr style="border-color: var(--border-color); margin: 20px 0;">
 
                 <div class="form-field">
                     <label>Rendszerüzenet / Hírek</label>
@@ -193,18 +249,18 @@ body {
                     <button class="submit-btn" style="margin-top: 0; flex: 1;" onclick="saveNews()">Hír Mentése</button>
                 </div>
 
-                <hr style="border-color: rgba(255,255,255,0.05); margin: 20px 0;">
+                <hr style="border-color: var(--border-color); margin: 20px 0;">
 
                 <div class="form-field">
                     <label>Weboldal Főszíne</label>
                     <div style="display: flex; gap: 10px;">
-                        <input type="color" id="theme-color-picker" value="#ffb703" style="height: 50px; width: 60px; padding: 2px; cursor: pointer; border-radius: 8px; background: transparent; border: 1px solid rgba(255,255,255,0.1);">
-                        <button class="submit-btn" style="margin-top: 0; flex: 1;" onclick="changeTheme()">Szín Alkalmazása</button>
+                        <input type="color" id="theme-color-picker" value="#ffb703" style="height: 50px; width: 60px; padding: 2px; cursor: pointer; border-radius: 8px; background: transparent; border: 1px solid var(--border-color);">
+                        <button class="submit-btn" style="margin-top: 0; flex: 1;" onclick="changeTheme()">Szín Alkalmazása (Mindenkinek)</button>
                         <button class="submit-btn" style="margin-top: 0; width: 60px; background: transparent; border: 2px solid var(--accent-color); color: var(--accent-color); font-size: 1.5rem; padding: 0;" onclick="resetTheme()" title="Eredeti szín visszaállítása">&#8635;</button>
                     </div>
                 </div>
 
-                <hr style="border-color: rgba(255,255,255,0.05); margin: 20px 0;">
+                <hr style="border-color: var(--border-color); margin: 20px 0;">
 
                 <div class="form-field">
                     <label>Új Csapattag Hozzáadása</label>
@@ -213,22 +269,22 @@ body {
                     <button class="submit-btn" onclick="addNewMember()">Tag Létrehozása</button>
                 </div>
 
-                <hr style="border-color: rgba(255,255,255,0.05); margin: 20px 0;">
+                <hr style="border-color: var(--border-color); margin: 20px 0;">
 
                 <div class="form-field">
                     <label>Tartalom Szerkesztése</label>
-                    <p style="color: #8a99ad; font-size: 0.9rem; margin-bottom: 10px; line-height: 1.5;">Kattints a bekapcsoláshoz, majd menj a Kezdőlapra a szövegek/képek átírásához. <b>Szerkesztő módban a profil ablakok megnyitásához a kártya üres részére kattints (ne a névre).</b></p>
+                    <p style="color: #8a99ad; font-size: 0.9rem; margin-bottom: 10px; line-height: 1.5;">Kattints a bekapcsoláshoz, majd menj a Kezdőlapra a szövegek/képek átírásához.</p>
                     <button id="toggle-edit-btn" class="submit-btn" onclick="toggleEditMode()" style="background: transparent; border: 2px solid var(--accent-color); color: var(--accent-color);">Szerkesztés Bekapcsolása</button>
-                    <button class="submit-btn" onclick="saveEdits()">Minden Módosítás Mentése</button>
+                    <button class="submit-btn" onclick="saveEdits()">Minden Módosítás Mentése (Mindenkinek)</button>
                 </div>
             </div>
         </div>
 
         <div id="home-section" class="page-section active">
             
-            <div id="news-display" style="width: 100%; max-width: 900px; background: rgba(255, 255, 255, 0.05); border-left: 5px solid var(--accent-color); padding: 20px; border-radius: 10px; margin-bottom: 30px; display: none; position: relative;">
+            <div id="news-display" style="width: 100%; max-width: 900px; background: var(--member-row-bg); border-left: 5px solid var(--accent-color); padding: 20px; border-radius: 10px; margin-bottom: 30px; display: none; position: relative;">
                 <h3 style="color: var(--accent-color); margin-bottom: 5px; text-transform: uppercase; font-size: 1rem; letter-spacing: 2px;">Rendszerüzenet</h3>
-                <p id="news-text" style="color: #d1d5db; line-height: 1.6;"></p>
+                <p id="news-text" style="color: var(--text-color); line-height: 1.6;"></p>
                 <span id="news-delete-btn" onclick="askDeleteNews()" style="position: absolute; top: 10px; right: 15px; font-size: 1.8rem; color: #ff4d4d; cursor: pointer; display: none;" title="Hír Törlése">&times;</span>
             </div>
 
@@ -342,66 +398,111 @@ body {
     </div>
 
     <script>
-        /* ─── TÉMA VÁLTÓ LOGIKA ─── */
+        /* ─── FIREBASE INICIALIZÁLÁS ÉS ADATBÁZIS ÖSSZEKÖTÉS ─── */
+        const firebaseConfig = {
+            apiKey: "AIzaSyDyc24HjPFpao6F3nO4e3addVkizYqnLFc",
+            authDomain: "kooperacio-web.firebaseapp.com",
+            databaseURL: "https://kooperacio-web-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "kooperacio-web",
+            storageBucket: "kooperacio-web.firebasestorage.app",
+            messagingSenderId: "249990083665",
+            appId: "1:249990083665:web:30739c9b47f9c67304f470",
+            measurementId: "G-M1NZTXRP7G"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        /* Globális változók a valós idejű adatokhoz */
+        let globalUsers = {};
+        let globalRoles = {};
+        let globalPfps = {};
+        let currentLoggedInUser = null;
+
+        /* ─── TÉMA VÁLTÓ LOGIKA (Sötét/Világos - ez marad a gépen) ─── */
         function toggleTheme() {
             const body = document.body;
             const current = body.getAttribute('data-theme') || 'dark';
             const next = current === 'dark' ? 'light' : 'dark';
             body.setAttribute('data-theme', next);
             localStorage.setItem('coop_theme_mode', next);
-            console.log("Téma váltva erre:", next); // Ezzel tesztelheted a konzolban (F12)
         }
 
-        // Ezt a sort pedig illeszd be a window.addEventListener('DOMContentLoaded', ... ) belsejébe:
-        const savedMode = localStorage.getItem('coop_theme_mode');
-        if (savedMode) document.body.setAttribute('data-theme', savedMode);
-
-        let currentLoggedInUser = null;
-
-        /* ─── OLDAL BETÖLTÉSEKOR ─── */
+        /* ─── OLDAL BETÖLTÉSE ÉS FIREBASE VALÓS IDEJŰ FIGYELŐK ─── */
         window.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('coop_theme');
-            if (savedTheme) { document.documentElement.style.setProperty('--accent-color', savedTheme); document.getElementById('theme-color-picker').value = savedTheme; }
+            // Helyi téma betöltése
+            const savedMode = localStorage.getItem('coop_theme_mode');
+            if (savedMode === 'light') document.body.setAttribute('data-theme', 'light');
+            else document.body.setAttribute('data-theme', 'dark');
 
-            const savedNews = localStorage.getItem('coop_news');
-            if (savedNews) {
-                document.getElementById('news-text').innerText = savedNews;
-                document.getElementById('news-display').style.display = 'block';
-                document.getElementById('admin-news-input').value = savedNews;
-            }
-
-            const savedMembersHtml = localStorage.getItem('coop_members_html');
-            if (savedMembersHtml) document.getElementById('team-list-container').innerHTML = savedMembersHtml;
-
-            const savedModalsHtml = localStorage.getItem('coop_modals_html');
-            if (savedModalsHtml) document.getElementById('modals-container').innerHTML = savedModalsHtml;
-
-            const savedTexts = JSON.parse(localStorage.getItem('coop_saved_texts'));
-            if (savedTexts) {
-                for (const id in savedTexts) {
-                    const el = document.getElementById(id);
-                    if (el) el.innerHTML = savedTexts[id];
+            // --- FIREBASE LISTENERS (Ezek automatikusan frissülnek mindenkinél) ---
+            
+            // Weboldal Főszíne
+            database.ref('theme').on('value', snapshot => {
+                const color = snapshot.val();
+                if (color) {
+                    document.documentElement.style.setProperty('--accent-color', color);
+                    document.getElementById('theme-color-picker').value = color;
                 }
-            }
+            });
 
-            // F5 Frissítés javítva + TÖBBSZÖRÖS Admin ellenőrzés
+            // Hírek
+            database.ref('news').on('value', snapshot => {
+                const newsText = snapshot.val();
+                if (newsText) {
+                    document.getElementById('news-text').innerText = newsText;
+                    document.getElementById('news-display').style.display = 'block';
+                    document.getElementById('admin-news-input').value = newsText;
+                } else {
+                    document.getElementById('news-display').style.display = 'none';
+                    document.getElementById('admin-news-input').value = '';
+                }
+            });
+
+            // Csapattagok HTML
+            database.ref('members_html').on('value', snapshot => {
+                const html = snapshot.val();
+                if (html) document.getElementById('team-list-container').innerHTML = html;
+            });
+
+            // Profil ablakok HTML
+            database.ref('modals_html').on('value', snapshot => {
+                const html = snapshot.val();
+                if (html) document.getElementById('modals-container').innerHTML = html;
+            });
+
+            // Módosított szövegek (Szerkesztő módból)
+            database.ref('saved_texts').on('value', snapshot => {
+                const texts = snapshot.val();
+                if (texts) {
+                    for (const id in texts) {
+                        const el = document.getElementById(id);
+                        if (el) el.innerHTML = texts[id];
+                    }
+                }
+            });
+
+            // Felhasználók, Rangok, Profilképek (Taglista generáláshoz)
+            database.ref('users').on('value', snapshot => { globalUsers = snapshot.val() || {}; renderUsersList(); });
+            database.ref('user_pfps').on('value', snapshot => { 
+                globalPfps = snapshot.val() || {}; 
+                renderUsersList(); 
+                if (currentLoggedInUser) setupUserWidget(); 
+            });
+            database.ref('user_roles').on('value', snapshot => { 
+                globalRoles = snapshot.val() || {}; 
+                if (currentLoggedInUser) checkAdminRightsImmediately(globalRoles[currentLoggedInUser]);
+                renderUsersList(); 
+            });
+
+            // Munkamenet ellenőrzése (Belépés F5 után)
             const sessionUser = sessionStorage.getItem('coop_logged_in_user');
             if (sessionUser) {
                 currentLoggedInUser = sessionUser;
-                document.getElementById('login-overlay').style.display = 'none';
-                
-                let roles = JSON.parse(localStorage.getItem('coop_user_roles')) || {};
-                let isUserAdmin = (sessionUser === "admin") || 
-                                  (Array.isArray(roles[sessionUser]) && roles[sessionUser].includes("admin")) || 
-                                  (roles[sessionUser] === "admin");
-                
-                if (isUserAdmin) {
-                    document.getElementById('admin-nav-btn').style.display = 'block';
-                    document.getElementById('news-delete-btn').style.display = 'block';
-                }
+                const overlay = document.getElementById('login-overlay');
+                overlay.style.display = 'none';
                 setupUserWidget();
+                // A jogosultságokat a 'user_roles' on('value') listener állítja be!
             }
-            renderUsersList();
         });
 
         function triggerToast(message, isSuccess = false) {
@@ -412,38 +513,30 @@ body {
             setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
-/* ─── RANGOK KEZELÉSE (ÉLŐBAN FRISSÜLŐ JOGOKKAL) ─── */
+        /* ─── RANGOK KEZELÉSE (Már Firebase-be ment) ─── */
         function assignRole() {
             const user = document.getElementById('admin-role-user').value;
             const role = document.getElementById('admin-role-select').value;
             if (!user) { triggerToast("Nincs kiválasztva felhasználó!"); return; }
             
-            let roles = JSON.parse(localStorage.getItem('coop_user_roles')) || {};
-            
             if (role === "") {
-                delete roles[user];
+                database.ref('user_roles/' + user).remove();
                 triggerToast(`${user} minden rangja törölve lett!`, true);
             } else {
-                if (!roles[user]) { roles[user] = []; } 
-                else if (typeof roles[user] === 'string') { roles[user] = [roles[user]]; }
+                let userRoles = globalRoles[user] || [];
+                if (typeof userRoles === 'string') userRoles = [userRoles];
                 
-                if (!roles[user].includes(role)) {
-                    roles[user].push(role);
+                if (!userRoles.includes(role)) {
+                    userRoles.push(role);
                     triggerToast(`${user} megkapta a(z) ${role.toUpperCase()} rangot!`, true);
                 } else {
-                    roles[user] = roles[user].filter(r => r !== role);
-                    if (roles[user].length === 0) delete roles[user];
+                    userRoles = userRoles.filter(r => r !== role);
                     triggerToast(`${user} elvesztette a(z) ${role.toUpperCase()} rangot!`, true);
                 }
+
+                if (userRoles.length === 0) database.ref('user_roles/' + user).remove();
+                else database.ref('user_roles/' + user).set(userRoles);
             }
-            localStorage.setItem('coop_user_roles', JSON.stringify(roles));
-            
-            // --- ÉLŐ ELLENŐRZÉS: Ha az éppen bejelentkezett felhasználót érinti ---
-            if (user === currentLoggedInUser) {
-                checkAdminRightsImmediately(roles[user]);
-            }
-            
-            renderUsersList(); 
         }
 
         /* ─── ÉLŐ JOGOSULTSÁG ELLENŐRZŐ ─── */
@@ -461,8 +554,6 @@ body {
             } else {
                 adminNav.style.display = 'none';
                 if(newsDelete) newsDelete.style.display = 'none';
-                
-                // Ha elvettük az admin jogot, és az admin panelen volt, dobjuk vissza a kezdőlapra
                 if (document.getElementById('admin-section').classList.contains('active')) {
                     switchTab('home-section', document.querySelector('.nav-btn'));
                     triggerToast("Admin jogod visszavonva!");
@@ -470,17 +561,18 @@ body {
             }
         }
 
-        /* ─── TÉMA KEZELÉS ─── */
-        function changeTheme() { const color = document.getElementById('theme-color-picker').value; document.documentElement.style.setProperty('--accent-color', color); localStorage.setItem('coop_theme', color); triggerToast("Szín sikeresen módosítva!", true); }
-        function resetTheme() { const defaultColor = "#ffb703"; document.documentElement.style.setProperty('--accent-color', defaultColor); document.getElementById('theme-color-picker').value = defaultColor; localStorage.setItem('coop_theme', defaultColor); triggerToast("Alapértelmezett szín visszaállítva!", true); }
+        /* ─── TÉMA, HÍREK ÉS SZERKESZTÉSEK MENTÉSE (Firebase-be) ─── */
+        function changeTheme() { 
+            const color = document.getElementById('theme-color-picker').value; 
+            database.ref('theme').set(color); 
+            triggerToast("Szín sikeresen módosítva mindenkinél!", true); 
+        }
+        function resetTheme() { database.ref('theme').set("#ffb703"); triggerToast("Alapértelmezett szín visszaállítva!", true); }
 
-        /* ─── HÍREK KEZELÉSE ─── */
         function saveNews() {
             const text = document.getElementById('admin-news-input').value.trim();
             if (text === "") { triggerToast("A mező üres!"); return; }
-            document.getElementById('news-text').innerText = text;
-            document.getElementById('news-display').style.display = 'block';
-            localStorage.setItem('coop_news', text);
+            database.ref('news').set(text);
             triggerToast("Rendszerüzenet kitéve!", true);
         }
 
@@ -488,10 +580,20 @@ body {
         function closeConfirmModal() { document.getElementById('custom-confirm-modal').classList.remove('active'); }
         function executeDeleteNews() {
             closeConfirmModal();
-            document.getElementById('admin-news-input').value = "";
-            document.getElementById('news-display').style.display = 'none';
-            localStorage.removeItem('coop_news');
-            triggerToast("Rendszerüzenet törölve.", true);
+            database.ref('news').remove();
+            triggerToast("Rendszerüzenet törölve mindenkinél.", true);
+        }
+
+        function saveEdits() {
+            const dataToSave = {}; 
+            document.querySelectorAll('.editable').forEach(el => { if (el.id) dataToSave[el.id] = el.innerHTML; });
+            database.ref('saved_texts').set(dataToSave);
+            
+            const wasEditMode = isEditMode; if (wasEditMode) toggleEditMode(); 
+            database.ref('members_html').set(document.getElementById('team-list-container').innerHTML);
+            database.ref('modals_html').set(document.getElementById('modals-container').innerHTML);
+            if (wasEditMode) toggleEditMode(); 
+            triggerToast("Minden módosítás elmentve a felhőbe!", true);
         }
 
         /* ─── ÚJ TAG ÉS TÖRLÉS ─── */
@@ -515,14 +617,14 @@ body {
             document.getElementById('new-member-name').value = ''; document.getElementById('new-member-rank').value = '';
             
             if (isEditMode) { document.querySelectorAll('.editable').forEach(el => { el.contentEditable = true; el.classList.add('editable-active'); }); document.querySelectorAll('img').forEach(img => img.classList.add('editable-active')); }
-            triggerToast("Új tag hozzáadva! Kérlek, kattints a Mentés gombra az elmentéséhez.", true);
+            triggerToast("Új tag hozzáadva! Kérlek, kattints a MENTÉS gombra, hogy mások is lássák.", true);
         }
 
         function deleteMember(id) {
             if (confirm("Biztosan törlöd ezt a tagot?")) {
                 const modal = document.getElementById('md-' + id); if (modal) modal.remove();
                 const row = document.querySelector(`.member-row[onclick="openProfile(event, '${id}')"]`); if (row) row.remove();
-                document.body.style.overflow = 'auto'; triggerToast("Tag törölve! Kérlek ments a véglegesítéshez.", true);
+                document.body.style.overflow = 'auto'; triggerToast("Tag törölve! Kérlek MENTS a véglegesítéshez.", true);
             }
         }
 
@@ -535,8 +637,8 @@ body {
             document.querySelectorAll('img').forEach(img => { if(!img.classList.contains('user-widget-pfp') && !img.closest('.login-card')) img.classList.toggle('editable-active', isEditMode); });
             document.querySelectorAll('.delete-member-btn').forEach(btn => btn.style.display = isEditMode ? 'block' : 'none');
             
-            if (isEditMode) { btn.innerText = "Szerkesztés Kikapcsolása"; btn.style.background = "#ff4d4d"; btn.style.borderColor = "#ff4d4d"; btn.style.color = "white"; triggerToast("Szerkesztés BEKAPCSOLVA!", true); }
-            else { btn.innerText = "Szerkesztés Bekapcsolása"; btn.style.background = "transparent"; btn.style.borderColor = "var(--accent-color)"; btn.style.color = "var(--accent-color)"; }
+            if (isEditMode) { btn.innerText = "Szerkesztés Kikapcsolása"; btn.style.background = "#ff4d4d"; btn.style.color = "white"; triggerToast("Szerkesztés BEKAPCSOLVA!", true); }
+            else { btn.innerText = "Szerkesztés Bekapcsolása"; btn.style.background = "transparent"; btn.style.color = "var(--accent-color)"; }
         }
 
         document.body.addEventListener('click', function(e) {
@@ -548,27 +650,13 @@ body {
             }
         });
 
-        function saveEdits() {
-            const dataToSave = {}; document.querySelectorAll('.editable').forEach(el => { if (el.id) dataToSave[el.id] = el.innerHTML; });
-            localStorage.setItem('coop_saved_texts', JSON.stringify(dataToSave));
-            const wasEditMode = isEditMode; if (wasEditMode) toggleEditMode(); 
-            localStorage.setItem('coop_members_html', document.getElementById('team-list-container').innerHTML);
-            localStorage.setItem('coop_modals_html', document.getElementById('modals-container').innerHTML);
-            if (wasEditMode) toggleEditMode(); 
-            triggerToast("Minden módosítás elmentve!", true);
-        }
-
-        /* ─── TAGLISTA ÉS RANGOK RENDERELÉSE ─── */
+        /* ─── TAGLISTA RENDERELÉSE ─── */
         function renderUsersList() {
             const list = document.getElementById('registered-users-list');
             const roleSelect = document.getElementById('admin-role-user');
             
             list.innerHTML = '';
             if (roleSelect) roleSelect.innerHTML = '<option value="">Válassz felhasználót...</option>';
-            
-            const users = JSON.parse(localStorage.getItem('coop_users')) || {};
-            const pfps = JSON.parse(localStorage.getItem('coop_user_pfps')) || {};
-            const roles = JSON.parse(localStorage.getItem('coop_user_roles')) || {};
             
             const roleStyles = {
                 'admin': 'background: #ffb703; color: #000;',
@@ -579,26 +667,25 @@ body {
                 'nav': 'background: #20c997; color: #000000;'
             };
 
-            for (const username in users) {
-                const pfp = pfps[username] || 'pfp.jpg';
-                
+            for (const username in globalUsers) {
+                const pfp = globalPfps[username] || 'pfp.jpg';
                 let roleBadges = '';
-                let userRoles = roles[username];
+                let userRoles = globalRoles[username];
                 
                 if (userRoles) {
                     if (typeof userRoles === 'string') userRoles = [userRoles];
                     userRoles.forEach(r => {
                         const style = roleStyles[r] || 'background: #555; color: #fff;';
-                        roleBadges += `<span style="${style} font-size: 0.75rem; padding: 4px 8px; border-radius: 8px; margin-left: 5px; font-weight: bold; text-transform: uppercase;">${r}</span>`;
+                        roleBadges += `<span style="${style} font-size: 0.75rem; padding: 4px 8px; border-radius: 8px; margin-left: 5px; font-weight: bold; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">${r}</span>`;
                     });
                 }
                 
-                const html = `<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border-left: 4px solid var(--accent-color);">
+                const html = `<div style="display: flex; align-items: center; justify-content: space-between; background: var(--member-row-bg); color: var(--text-color); padding: 15px 20px; border-radius: 12px; border-left: 5px solid var(--accent-color); box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 10px; transition: transform 0.2s;">
                                 <div style="display: flex; align-items: center; gap: 15px;">
-                                    <img src="${pfp}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid var(--accent-color);">
-                                    <span style="font-weight: bold; font-size: 1.1rem;">${username}</span>
+                                    <img src="${pfp}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-color); box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                    <span style="font-weight: 700; font-size: 1.15rem; letter-spacing: 0.5px;">${username}</span>
                                 </div>
-                                <div style="display: flex; flex-wrap: wrap; gap: 5px;">${roleBadges}</div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end;">${roleBadges}</div>
                               </div>`;
                 list.insertAdjacentHTML('beforeend', html);
 
@@ -606,32 +693,32 @@ body {
                     roleSelect.insertAdjacentHTML('beforeend', `<option value="${username}">${username}</option>`);
                 }
             }
-            if(Object.keys(users).length === 0) { list.innerHTML = '<p style="color: #8a99ad; text-align: center;">Még nincsenek regisztrált felhasználók.</p>'; }
+            if(Object.keys(globalUsers).length === 0) { list.innerHTML = '<p style="color: #8a99ad; text-align: center; font-style: italic;">Még nincsenek regisztrált felhasználók.</p>'; }
         }
 
-        /* ─── BEJELENTKEZÉS ÉS REGISZTRÁCIÓ ─── */
+        /* ─── BEJELENTKEZÉS ÉS REGISZTRÁCIÓ (Firebase módosítva) ─── */
         function toggleAuthView(view) { document.getElementById('login-card').style.display = view === 'register' ? 'none' : 'flex'; document.getElementById('register-card').style.display = view === 'register' ? 'flex' : 'none'; }
 
         function handleRegister() {
-            const userVal = document.getElementById('reg-username').value.trim(); const passVal = document.getElementById('reg-password').value;
+            const userVal = document.getElementById('reg-username').value.trim(); 
+            const passVal = document.getElementById('reg-password').value;
             if (!userVal || !passVal) { triggerToast("Hiba: Minden mezőt ki kell tölteni!"); return; }
-            let registeredUsers = JSON.parse(localStorage.getItem('coop_users')) || {};
-            if (registeredUsers[userVal] || userVal.toLowerCase() === "admin") { triggerToast("Hiba: Ez a név már foglalt!"); return; }
-            registeredUsers[userVal] = passVal; localStorage.setItem('coop_users', JSON.stringify(registeredUsers));
+            if (globalUsers[userVal] || userVal.toLowerCase() === "admin") { triggerToast("Hiba: Ez a név már foglalt!"); return; }
+            
+            database.ref('users/' + userVal).set(passVal);
             triggerToast("Sikeres regisztráció! Lépj be.", true);
-            renderUsersList(); toggleAuthView('login');
+            toggleAuthView('login');
         }
 
         function handleLogin() {
-            const userVal = document.getElementById('login-username').value.trim(); const passVal = document.getElementById('login-password').value;
-            let registeredUsers = JSON.parse(localStorage.getItem('coop_users')) || {};
+            const userVal = document.getElementById('login-username').value.trim(); 
+            const passVal = document.getElementById('login-password').value;
             
-            let roles = JSON.parse(localStorage.getItem('coop_user_roles')) || {};
             let isUserAdmin = (userVal === "admin") || 
-                              (Array.isArray(roles[userVal]) && roles[userVal].includes("admin")) || 
-                              (roles[userVal] === "admin");
+                              (Array.isArray(globalRoles[userVal]) && globalRoles[userVal].includes("admin")) || 
+                              (globalRoles[userVal] === "admin");
 
-            if ((userVal === "admin" && passVal === "1234") || (registeredUsers[userVal] && registeredUsers[userVal] === passVal)) {
+            if ((userVal === "admin" && passVal === "1234") || (globalUsers[userVal] && globalUsers[userVal] === passVal)) {
                 loginSuccess(userVal, isUserAdmin);
             } else { 
                 triggerToast("Hiba: Helytelen felhasználónév vagy jelszó!"); 
@@ -654,28 +741,53 @@ body {
 
         /* ─── WIDGET ÉS BEÁLLÍTÁSOK ─── */
         function setupUserWidget() {
-            document.getElementById('user-top-widget').style.display = 'flex'; document.getElementById('display-widget-name').innerText = currentLoggedInUser;
-            let pfps = JSON.parse(localStorage.getItem('coop_user_pfps')) || {}; document.getElementById('display-widget-pfp').src = pfps[currentLoggedInUser] || 'pfp.jpg';
+            document.getElementById('user-top-widget').style.display = 'flex'; 
+            document.getElementById('display-widget-name').innerText = currentLoggedInUser;
+            document.getElementById('display-widget-pfp').src = globalPfps[currentLoggedInUser] || 'pfp.jpg';
         }
 
         function openProfileSettings() {
-            document.getElementById('user-settings-modal').classList.add('active'); document.getElementById('setting-new-name').value = currentLoggedInUser;
-            let pfps = JSON.parse(localStorage.getItem('coop_user_pfps')) || {}; document.getElementById('setting-pfp-url').value = pfps[currentLoggedInUser] || 'pfp.jpg';
+            document.getElementById('user-settings-modal').classList.add('active'); 
+            document.getElementById('setting-new-name').value = currentLoggedInUser;
+            document.getElementById('setting-pfp-url').value = globalPfps[currentLoggedInUser] || 'pfp.jpg';
         }
         function closeProfileSettings() { document.getElementById('user-settings-modal').classList.remove('active'); }
 
         function saveUserSettings() {
-            const newName = document.getElementById('setting-new-name').value.trim(), newPass = document.getElementById('setting-new-pass').value, newPfp = document.getElementById('setting-pfp-url').value.trim();
+            const newName = document.getElementById('setting-new-name').value.trim();
+            const newPass = document.getElementById('setting-new-pass').value;
+            const newPfp = document.getElementById('setting-pfp-url').value.trim();
+            
             if (!newName) { triggerToast("A név nem lehet üres!"); return; }
-            let users = JSON.parse(localStorage.getItem('coop_users')) || {}; let pfps = JSON.parse(localStorage.getItem('coop_user_pfps')) || {};
-            if (currentLoggedInUser === "admin" && newName !== "admin") { triggerToast("Az admin fiók nevét nem módosíthatod!"); return; }
-            if (currentLoggedInUser !== "admin") {
-                if (newName !== currentLoggedInUser && users[newName]) { triggerToast("Ez a név már foglalt!"); return; }
-                let passToSave = newPass ? newPass : users[currentLoggedInUser]; delete users[currentLoggedInUser]; users[newName] = passToSave; localStorage.setItem('coop_users', JSON.stringify(users));
+            
+            const oldName = currentLoggedInUser;
+            
+            if (oldName === "admin" && newName !== "admin") { triggerToast("Az admin fiók nevét nem módosíthatod!"); return; }
+            
+            if (oldName !== "admin" && newName !== oldName) {
+                if (globalUsers[newName]) { triggerToast("Ez a név már foglalt!"); return; }
+                
+                let passToSave = newPass || globalUsers[oldName];
+                database.ref('users/' + newName).set(passToSave);
+                database.ref('users/' + oldName).remove();
+                
+                if (globalPfps[oldName] || newPfp) {
+                    database.ref('user_pfps/' + newName).set(newPfp || globalPfps[oldName]);
+                    database.ref('user_pfps/' + oldName).remove();
+                }
+                if (globalRoles[oldName]) {
+                    database.ref('user_roles/' + newName).set(globalRoles[oldName]);
+                    database.ref('user_roles/' + oldName).remove();
+                }
+            } else {
+                if (newPass) database.ref('users/' + oldName).set(newPass);
+                if (newPfp) database.ref('user_pfps/' + oldName).set(newPfp);
             }
-            if (newPfp) { pfps[newName] = newPfp; localStorage.setItem('coop_user_pfps', JSON.stringify(pfps)); }
-            currentLoggedInUser = newName; sessionStorage.setItem('coop_logged_in_user', newName);
-            setupUserWidget(); renderUsersList(); closeProfileSettings(); triggerToast("Profil sikeresen frissítve!", true);
+            
+            currentLoggedInUser = newName; 
+            sessionStorage.setItem('coop_logged_in_user', newName);
+            closeProfileSettings(); 
+            triggerToast("Profil sikeresen frissítve!", true);
         }
 
         /* ─── IDŐPONT FOGLALÁS ─── */
@@ -699,17 +811,14 @@ body {
             triggerToast("Foglalás beküldve!", true);
         }
 
-        /* ─── TABOK ÉS PROFIL ABLAK MEGNITÁS (JAVÍTVA) ─── */
+        /* ─── TABOK ÉS MODALOK ─── */
         function openProfile(e, id) {
             if (isEditMode && (e.target.classList.contains('editable') || e.target.classList.contains('editable-active'))) return;
             document.getElementById('md-' + id).classList.add('active'); 
             document.body.style.overflow = 'hidden'; 
         }
-
         function closeProfile(id) { document.getElementById('md-' + id).classList.remove('active'); document.body.style.overflow = 'auto'; }
-        
         window.onclick = function(e) { if (e.target.classList.contains('sub-page-overlay')) { e.target.classList.remove('active'); document.body.style.overflow = 'auto'; } }
-        
         function switchTab(sectionId, btn) { document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active')); document.getElementById(sectionId).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
     </script>
 </body>
