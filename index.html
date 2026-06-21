@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        /* ─── TÉMA VÁLTOZÓK (Sötét/Világos mód támogatással) ─── */
+        /* ─── TÉMA VÁLTOZÓK ─── */
         :root {
             --accent-color: #ffb703;
             --bg-color: #0b0c10;
@@ -70,7 +70,9 @@
         
         #admin-nav-btn { color: var(--accent-color); border-color: var(--accent-color); margin-top: 10px; }
         #admin-nav-btn:hover, #admin-nav-btn.active { background: var(--accent-color) !important; color: #0b0c10 !important; }
-        #theme-toggle { margin-top: auto; }
+        
+        #theme-toggle { margin-top: 10px; border-color: var(--accent-color) !important; color: var(--accent-color) !important; }
+        #theme-toggle:hover { background: var(--accent-color) !important; color: #0b0c10 !important; }
 
         .main-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 20px; overflow-y: auto; position: relative; }
         .page-section { width: 100%; display: none; flex-direction: column; align-items: center; }
@@ -160,7 +162,7 @@
         <button class="nav-btn" onclick="switchTab('schedule-section', this)">Időpont</button>
         <button class="nav-btn" onclick="switchTab('users-section', this)">Taglista</button>
         <button class="nav-btn" id="admin-nav-btn" onclick="switchTab('admin-section', this)" style="display:none;">Admin Panel</button>
-        <button class="nav-btn" onclick="toggleTheme()" id="theme-toggle" style="margin-top: 10px; border-color: var(--accent-color); color: var(--accent-color);">Világos/Sötét Mód</button>
+        <button class="nav-btn" onclick="toggleTheme()" id="theme-toggle">Világos/Sötét Mód</button>
         <button class="nav-btn" onclick="handleLogout()" style="color: #ff4d4d; border-color: #ff4d4d; margin-top: auto;">Kijelentkezés</button>
     </div>
 
@@ -229,7 +231,7 @@
                 <div class="form-field">
                     <label>Új Tag Kézi Létrehozása</label>
                     <input type="text" class="form-input" id="new-member-name" placeholder="Tag Neve (pl. John Doe)">
-                    <input type="text" class="form-input" id="new-member-rank" placeholder="Rangja (pl. Őrmester)">
+                    <input type="text" class="form-input" id="new-member-rank" placeholder="Rangja (pl. NNI - Őrmester)">
                     <button class="submit-btn" onclick="addNewMember()">Tag Létrehozása</button>
                 </div>
 
@@ -261,8 +263,30 @@
 
             <div class="team-container">
                 <h2 class="team-title editable" id="edit-team-title">Kattints a profilok megtekintéséhez</h2>
+                
                 <div id="team-list-container">
+                    <div class="member-row" onclick="openProfile(event, 'zsombor')">
+                        <div class="member-info">
+                            <div class="member-name editable" id="name-zsombor">Zsombor</div>
+                            <div class="member-rank editable" id="rank-zsombor">Honvédség - Főhadnagy</div>
+                        </div>
+                        <img src="honved.jpg" class="mini-logo" alt="Logo">
                     </div>
+                    <div class="member-row" onclick="openProfile(event, 'aaron')">
+                        <div class="member-info">
+                            <div class="member-name editable" id="name-aaron">Aaron</div>
+                            <div class="member-rank editable" id="rank-aaron">NAV - Zászlós</div>
+                        </div>
+                        <img src="nav.png" class="mini-logo" alt="Logo">
+                    </div>
+                    <div class="member-row" onclick="openProfile(event, 'zuzkovics')">
+                        <div class="member-info">
+                            <div class="member-name editable" id="name-zuzkovics">zuzkovics</div>
+                            <div class="member-rank editable" id="rank-zuzkovics">NNI - Törzsőrmester</div>
+                        </div>
+                        <img src="nni.jpg" class="mini-logo" alt="Logo">
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -278,10 +302,16 @@
                     <input type="time" class="form-input" id="appt-time">
                 </div>
                 <div class="form-field">
-                    <label>Megjegyzés / Részletek</label>
+                    <label>Megjegyzés / Részletek (Kötelező)</label>
                     <textarea class="form-input" id="appt-note" placeholder="Írd le miről van szó..."></textarea>
                 </div>
                 <button class="submit-btn" onclick="submitAppointment()">Közzététel</button>
+            </div>
+
+            <div style="width: 100%; max-width: 450px; margin-top: 35px; display: flex; flex-direction: column; align-items: center;">
+                <h2 style="font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; color: #8a99ad; margin-bottom: 5px;">Közzétett Időpontok</h2>
+                <div id="appointments-display-list" style="width: 100%; display: flex; flex-direction: column; gap: 15px;">
+                    </div>
             </div>
         </div>
 
@@ -296,7 +326,37 @@
     </div>
 
     <div id="modals-container">
+        <div id="md-zsombor" class="sub-page-overlay">
+            <div class="sub-page-content">
+                <span class="close-btn" onclick="closeProfile('zsombor')">&times;</span>
+                <img src="honved.jpg" class="profile-logo" alt="Honvédség">
+                <div class="profile-name editable" id="edit-zs-profname">Zsombor</div>
+                <div class="profile-title editable" id="edit-zs-proftitle" style="color: #4ed964;">Honvédség - Főhadnagy</div>
+                <p class="profile-text editable" id="edit-zs-profdesc">Zsombor egy nagyon jó fej Főhadnagy, és nagyon jól végzi a dolgát. A taktikai műveletek és a stratégiai tervezés igazi mestere, aki hideg fejjel hozza meg a legjobb döntéseket a legmelegebb helyzetekben is. Mindemellett a csapat moráljáért is ő felel: kiváló humorával és bajtársias hozzáállásával mindig garantálja a jó hangulatot az állományon belül, miközben fegyelmet és tiszteletet parancsol.</p>
+                <button class="delete-member-btn" onclick="deleteMember('zsombor')">Tag Törlése</button>
+            </div>
         </div>
+        <div id="md-aaron" class="sub-page-overlay">
+            <div class="sub-page-content">
+                <span class="close-btn" onclick="closeProfile('aaron')">&times;</span>
+                <img src="nav.png" class="profile-logo" alt="NAV">
+                <div class="profile-name editable" id="edit-aa-profname">Aaron</div>
+                <div class="profile-title editable" id="edit-aa-proftitle" style="color: #ffb300;">NAV - Zászlós</div>
+                <p class="profile-text editable" id="edit-aa-profdesc">Aaron is nagyon cuki, viszont ő még cukibb mint Zsombor, zuzkovics szerelme. Pénzügyi nyomozóként és zászlósként senki sem látja át nála jobban a bonyolult hálózatokat, de a szigora mögött egy hihetetlenül imádnivaló személyiség rejlik. A kooperáció nélkülözhetetlen láncszeme, akiért nem mellesleg odáig van a teljes nyomozóiroda élvonalbeli törzsőrmestere is.</p>
+                <button class="delete-member-btn" onclick="deleteMember('aaron')">Tag Törlése</button>
+            </div>
+        </div>
+        <div id="md-zuzkovics" class="sub-page-overlay">
+            <div class="sub-page-content">
+                <span class="close-btn" onclick="closeProfile('zuzkovics')">&times;</span>
+                <img src="nni.jpg" class="profile-logo" alt="NNI">
+                <div class="profile-name editable" id="edit-zu-profname">zuzkovics</div>
+                <div class="profile-title editable" id="edit-zu-proftitle" style="color: #00d2ff;">NNI - Törzsőrmester</div>
+                <p class="profile-text editable" id="edit-zu-profdesc">Ő a legcukibb hármuk közül és, szerelmes Zsomborba és Aaronba is. Az NNI elit Törzsőrmestereként nap mint nap komoly bűnügyeket göngyölít fel, de a szíve a legnagyobb gyengéje. Egyszerre képes képviselni a törvény kőkemény öklét és a legaranyosabb, legkedvesebb barátot, aki képtelen választani a Honvédség sármos főhadnagya és a NAV legcukibb zászlósa között – így mindkettejükért egyformán dobog a szíve.</p>
+                <button class="delete-member-btn" onclick="deleteMember('zuzkovics')">Tag Törlése</button>
+            </div>
+        </div>
+    </div>
 
     <div id="user-settings-modal" class="sub-page-overlay">
         <div class="sub-page-content" style="max-width: 450px;">
@@ -338,8 +398,18 @@
         </div>
     </div>
 
+    <div id="delete-confirm-modal" class="sub-page-overlay">
+        <div class="sub-page-content" style="max-width: 400px; padding: 40px 30px;">
+            <h3 style="color: #ff4d4d; margin-bottom: 20px; text-transform: uppercase;">Biztosan törlöd?</h3>
+            <p style="color: #8a99ad; margin-bottom: 30px;">Ezt a kiírt időpontot véglegesen eltávolítod. Ezt a műveletet nem lehet visszavonni.</p>
+            <div style="display: flex; gap: 15px;">
+                <button class="submit-btn" style="background: transparent; border: 1px solid #8a99ad; color: #8a99ad; margin-top: 0;" onclick="closeDeleteModal()">Mégsem</button>
+                <button class="submit-btn" style="background: #ff4d4d; color: white; margin-top: 0;" onclick="confirmDeleteAppointment()">Igen, Törlöm</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        /* TÖLTSD KI A SAJÁT FIREBASE ADATAIDDAL (Ha eddig más volt, írd át) */
         const firebaseConfig = {
             apiKey: "AIzaSyDyc24HjPFpao6F3nO4e3addVkizYqnLFc",
             authDomain: "kooperacio-web.firebaseapp.com",
@@ -372,6 +442,10 @@
             const savedMode = localStorage.getItem('coop_theme_mode');
             if (savedMode === 'light') document.body.setAttribute('data-theme', 'light');
             else document.body.setAttribute('data-theme', 'dark');
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('appt-date');
+            if(dateInput) dateInput.setAttribute('min', todayStr);
 
             // --- FIREBASE LISTENERS ---
             database.ref('theme').on('value', snapshot => {
@@ -434,10 +508,15 @@
                 }
             });
 
+            database.ref('appointments').on('value', snapshot => {
+                renderAppointmentsList(snapshot.val());
+            });
+
             const savedUser = sessionStorage.getItem('coop_logged_in_user');
             if (savedUser) {
                 currentLoggedInUser = savedUser;
-                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('login-overlay').style.opacity = '0';
+                setTimeout(() => { document.getElementById('login-overlay').style.display = 'none'; }, 500);
                 document.getElementById('user-top-widget').style.display = 'flex';
                 document.getElementById('display-widget-name').innerText = currentLoggedInUser;
                 const pfp = globalPfps[currentLoggedInUser] || 'pfp.jpg';
@@ -481,12 +560,9 @@
                     roleSelect.insertAdjacentHTML('beforeend', `<option value="${username}">${username}</option>`);
                 }
             }
-            if(Object.keys(globalUsers).length === 0) {
-                list.innerHTML = '<p style="color: #8a99ad; text-align: center; font-style: italic;">Még nincsenek regisztrált felhasználók.</p>';
-            }
         }
 
-        /* ─── AUTH (BEJELENTKEZÉS ÉS REG) ─── */
+        /* ─── AUTH ─── */
         function toggleAuthView(view) {
             document.getElementById('login-card').style.display = view === 'register' ? 'none' : 'flex';
             document.getElementById('register-card').style.display = view === 'register' ? 'flex' : 'none';
@@ -507,12 +583,10 @@
             const passVal = document.getElementById('login-password').value;
             
             if (userVal === "admin" && passVal === "kooperacioadmin") {
-                loginSuccess("admin");
-                return;
+                loginSuccess("admin"); return;
             }
             if (globalUsers[userVal] && globalUsers[userVal] === passVal) {
-                loginSuccess(userVal);
-                return;
+                loginSuccess(userVal); return;
             }
             triggerToast("Hiba: Hibás felhasználónév vagy jelszó!");
         }
@@ -526,6 +600,7 @@
             document.getElementById('display-widget-name').innerText = currentLoggedInUser;
             triggerToast("Sikeres belépés!", true);
             checkAdminRightsImmediately(globalRoles[currentLoggedInUser]);
+            location.reload();
         }
 
         function handleLogout() {
@@ -533,21 +608,13 @@
             location.reload();
         }
 
-        /* ─── JOGOSULTSÁG ÉS ADMIN ─── */
+        /* ─── JOGOSULTSÁGOK ─── */
         function checkAdminRightsImmediately(userRoles) {
             const isAdmin = (currentLoggedInUser === "admin") || (Array.isArray(userRoles) && userRoles.includes("admin")) || (userRoles === "admin");
             const adminNav = document.getElementById('admin-nav-btn');
             const newsDelete = document.getElementById('news-delete-btn');
-            if (isAdmin) {
-                adminNav.style.display = 'block';
-                if(newsDelete) newsDelete.style.display = 'block';
-            } else {
-                adminNav.style.display = 'none';
-                if(newsDelete) newsDelete.style.display = 'none';
-                if (document.getElementById('admin-section').classList.contains('active')) {
-                    switchTab('home-section', document.querySelector('.nav-btn'));
-                }
-            }
+            if (adminNav) adminNav.style.display = isAdmin ? 'block' : 'none';
+            if (newsDelete) newsDelete.style.display = isAdmin ? 'block' : 'none';
         }
 
         function assignRole() {
@@ -574,7 +641,7 @@
             }
         }
 
-        /* ─── ÚJ FUNKCIÓ: FELHASZNÁLÓ TÖRLÉSE AZ ADMIN PANELBŐL ─── */
+        /* ─── ADMIN: FELHASZNÁLÓ TÖRLÉSE ─── */
         function populateDeleteSelect() {
             const sel = document.getElementById('admin-delete-user');
             const currentVal = sel.value;
@@ -588,13 +655,9 @@
         }
 
         async function adminDeleteUserFromPanel() {
-            if (currentLoggedInUser !== "admin") {
-                triggerToast("Nincs admin jogosultságod ehhez!"); return;
-            }
+            if (currentLoggedInUser !== "admin") { triggerToast("Nincs admin jogosultságod!"); return; }
             const target = document.getElementById('admin-delete-user').value;
-            if (!target) {
-                triggerToast("Előbb válassz ki egy felhasználót a listából!"); return;
-            }
+            if (!target) { triggerToast("Válassz ki egy felhasználót a listából!"); return; }
             if (confirm(`BIZTOSAN véglegesen törlöd a(z) ${target} nevű fiókot és minden adatát?`)) {
                 try {
                     await database.ref('users/' + target).remove();
@@ -602,13 +665,11 @@
                     await database.ref('user_roles/' + target).remove();
                     triggerToast("Felhasználó véglegesen törölve!", true);
                     populateDeleteSelect(); 
-                } catch (error) {
-                    triggerToast("Hiba történt a törlés során!");
-                }
+                } catch (error) { triggerToast("Hiba történt a törlés során!"); }
             }
         }
 
-        /* ─── TÉMA & HÍREK MENTÉSE ─── */
+        /* ─── HÍREK MENTÉSE ─── */
         function changeTheme() {
             const color = document.getElementById('theme-color-picker').value;
             database.ref('theme').set(color);
@@ -632,7 +693,94 @@
             triggerToast("Hír törölve!", true);
         }
 
-        /* ─── PROFIL MENTÉSE (IMGBB KÉPFELTÖLTÉSSEL) ─── */
+        /* ─── IDŐPONTOK KEZELÉSE ─── */
+        function submitAppointment() {
+            const dateVal = document.getElementById('appt-date').value;
+            const timeVal = document.getElementById('appt-time').value;
+            const noteVal = document.getElementById('appt-note').value.trim();
+
+            if (!dateVal || !timeVal) { triggerToast("Kérlek adj meg dátumot és időpontot is!"); return; }
+            if (!noteVal) { triggerToast("Hiba: Megjegyzés nélkül nem küldhetsz be üzenetet!"); return; }
+
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const selectedDate = new Date(dateVal);
+            if (selectedDate < today) { triggerToast("Hiba: Múltbéli időpontot nem adhatsz meg!"); return; }
+
+            const apptId = "appt-" + Date.now();
+            database.ref('appointments/' + apptId).set({
+                id: apptId,
+                date: dateVal,
+                time: timeVal,
+                note: noteVal,
+                user: currentLoggedInUser || "Ismeretlen"
+            });
+
+            document.getElementById('appt-date').value = '';
+            document.getElementById('appt-time').value = '';
+            document.getElementById('appt-note').value = '';
+            triggerToast("Időpont sikeresen mentve és közzétéve!", true);
+        }
+
+        function renderAppointmentsList(data) {
+            const container = document.getElementById('appointments-display-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const appts = data || {};
+            
+            let myRoles = globalRoles[currentLoggedInUser] || [];
+            if (typeof myRoles === 'string') myRoles = [myRoles];
+            const isAdmin = (currentLoggedInUser === "admin") || myRoles.includes("admin");
+
+            for (const id in appts) {
+                const appt = appts[id];
+                const deleteBtn = isAdmin ? `<span onclick="showDeleteModal('${appt.id}')" style="color: #ff4d4d; font-size: 1.6rem; cursor: pointer; font-weight: bold; line-height:1;" title="Időpont Törlése">&times;</span>` : '';
+
+                const embedHtml = `
+                    <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-left: 5px solid var(--accent-color); padding: 20px; border-radius: 16px; position: relative; text-align: left; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 100%;">
+                        <div style="display: flex; justify-content: flex-end; margin-bottom: 5px;">
+                            ${deleteBtn}
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
+                            <span style="background: var(--input-bg); padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; color: var(--accent-color); border: 1px solid var(--border-color);">📅 ${appt.date}</span>
+                            <span style="background: var(--input-bg); padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; color: var(--accent-color); border: 1px solid var(--border-color);">🕒 ${appt.time}</span>
+                        </div>
+                        <p style="line-height: 1.5; color: var(--text-color); font-size: 1rem; white-space: pre-wrap; margin-bottom: 12px;">${appt.note}</p>
+                        <div style="border-top: 1px solid var(--border-color); padding-top: 10px; text-align: right;">
+                            <span style="color: #8a99ad; font-size: 0.8rem;">Beküldte: <b>${appt.user}</b></span>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', embedHtml);
+            }
+
+            if(Object.keys(appts).length === 0) {
+                container.innerHTML = '<p style="color: #8a99ad; font-style: italic; font-size: 0.95rem; text-align: center; margin-top: 10px;">Nincsenek kiírt időpontok/események.</p>';
+            }
+        }
+
+        let apptToDelete = null;
+
+        function showDeleteModal(id) {
+            apptToDelete = id;
+            document.getElementById('delete-confirm-modal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-confirm-modal').classList.remove('active');
+            apptToDelete = null;
+        }
+
+        function confirmDeleteAppointment() {
+            if (apptToDelete) {
+                database.ref('appointments/' + apptToDelete).remove();
+                triggerToast("Időpont törölve!", true);
+                closeDeleteModal();
+            }
+        }
+
+        /* ─── PROFIL BEÁLLÍTÁSOK ÉS IMGBB TALLÓZÁS ─── */
         function openProfileSettings() {
             document.getElementById('user-settings-modal').classList.add('active');
             document.getElementById('setting-new-name').value = currentLoggedInUser;
@@ -650,15 +798,13 @@
             
             if (!newName) { triggerToast("A név nem lehet üres!"); return; }
 
-            // HA TALLÓZOTT KÉPET (IMGbb logika)
             if (fileInput && fileInput.files.length > 0) {
                 triggerToast("Kép feltöltése folyamatban...", true);
                 const formData = new FormData();
                 formData.append('image', fileInput.files[0]);
                 
                 try {
-                    // IDE ÍRD BE AZ IMGBB API KULCSODAT A 'key=' UTÁN!!!
-                    const response = await fetch('https://api.imgbb.com/1/upload?key=5c7b915f81c510da1213f320bef82ba5', {
+                    const response = await fetch('https://api.imgbb.com/1/upload?key=IDE_JON_AZ_IMGBB_API_KULCS', {
                         method: 'POST',
                         body: formData
                     });
@@ -666,13 +812,9 @@
                     if (result.success) {
                         finalPfpUrl = result.data.url;
                     } else {
-                        triggerToast("Hiba a feltöltésnél! Rossz API kulcs?");
-                        return;
+                        triggerToast("Hiba a feltöltésnél! Rossz API kulcs?"); return;
                     }
-                } catch (e) { 
-                    triggerToast("Hálózat hiba a kép feltöltése során!"); 
-                    return;
-                }
+                } catch (e) { triggerToast("Hálózat hiba a kép feltöltése során!"); return; }
             }
 
             const oldName = currentLoggedInUser;
@@ -698,12 +840,10 @@
                 closeProfileSettings();
                 triggerToast("Profil sikeresen frissítve!", true);
                 setTimeout(() => location.reload(), 1500); 
-            } catch (error) {
-                triggerToast("Adatbázis hiba mentéskor!");
-            }
+            } catch (error) { triggerToast("Adatbázis hiba mentéskor!"); }
         }
 
-        /* ─── TOAST (ÉRTESÍTÉS) ─── */
+        /* ─── TOAST ─── */
         function triggerToast(message, isSuccess = false) {
             const toast = document.getElementById('error-toast');
             toast.innerText = message;
@@ -712,7 +852,7 @@
             setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
 
-        /* ─── SZERKESZTŐ MÓD ─── */
+        /* ─── TARTALOM SZERKESZTŐ ─── */
         function toggleEditMode() {
             isEditMode = !isEditMode;
             const btn = document.getElementById('toggle-edit-btn');
@@ -727,14 +867,10 @@
             document.querySelectorAll('.delete-member-btn').forEach(btn => btn.style.display = isEditMode ? 'block' : 'none');
             
             if (isEditMode) {
-                btn.innerText = "Szerkesztés Kikapcsolása";
-                btn.style.background = "#ff4d4d";
-                btn.style.color = "white";
+                btn.innerText = "Szerkesztés Kikapcsolása"; btn.style.background = "#ff4d4d"; btn.style.color = "white";
                 triggerToast("Szerkesztés BEKAPCSOLVA!", true);
             } else {
-                btn.innerText = "Szerkesztés Bekapcsolása";
-                btn.style.background = "transparent";
-                btn.style.color = "var(--accent-color)";
+                btn.innerText = "Szerkesztés Bekapcsolása"; btn.style.background = "transparent"; btn.style.color = "var(--accent-color)";
             }
         }
 
@@ -749,29 +885,45 @@
             triggerToast("Minden módosítás elmentve az összes felhasználónak!", true);
         }
 
-        /* ─── CSAPATTAG HOZZÁADÁSA / TÖRLÉSE ─── */
+/* ─── CSAPATTAGOK HOZZÁADÁSA (ÚJ KÉPFELISMERŐ LOGIKÁVAL) ─── */
         function addNewMember() {
             const name = document.getElementById('new-member-name').value.trim();
             const rank = document.getElementById('new-member-rank').value.trim();
             if (!name || !rank) { triggerToast("Töltsd ki a nevet és a rangot is!"); return; }
             
+            // LOGÓ KIVÁLASZTÁSA A RANG ALAPJÁN
+            let logoSrc = "badge.png"; // Alapértelmezett, ha nem találunk mást
+            const r = rank.toLowerCase();
+            
+            if (r.includes("nav")) {
+                logoSrc = "nav.png";
+            } else if (r.includes("nni")) {
+                logoSrc = "nni.jpg";
+            } else if (r.includes("honvéd") || r.includes("honved")) {
+                logoSrc = "honved.jpg";
+            } else if (r.includes("tek")) {
+                logoSrc = "tek.png";
+            } else if (r.includes("rendőr") || r.includes("rendor") || r.includes("pd")) {
+                logoSrc = "rendor.png";
+            }
+
             const id = "mem-" + Date.now();
             const listHtml = `<div class="member-row" onclick="openProfile(event, '${id}')">
                 <div class="member-info">
                     <div class="member-name editable" id="name-${id}">${name}</div>
                     <div class="member-rank editable" id="rank-${id}">${rank}</div>
                 </div>
-                <img src="badge.png" class="mini-logo" alt="Logo">
+                <img src="${logoSrc}" class="mini-logo" alt="Logo">
             </div>`;
             document.getElementById('team-list-container').insertAdjacentHTML('beforeend', listHtml);
 
             const modalHtml = `<div id="md-${id}" class="sub-page-overlay">
                 <div class="sub-page-content">
                     <span class="close-btn" onclick="closeProfile('${id}')">&times;</span>
-                    <img src="badge.png" class="profile-logo" alt="Logo">
+                    <img src="${logoSrc}" class="profile-logo" alt="Logo">
                     <div class="profile-name editable" id="mod-name-${id}">${name}</div>
                     <div class="profile-title editable" id="mod-rank-${id}">${rank}</div>
-                    <p class="profile-text editable" id="mod-desc-${id}">Kattints ide a szöveg szerkesztéséhez (ha be van kapcsolva a szerkesztő mód)...</p>
+                    <p class="profile-text editable" id="mod-desc-${id}">Kattints ide a szöveg szerkesztéséhez...</p>
                     <button class="delete-member-btn" onclick="deleteMember('${id}')" style="display:${isEditMode?'block':'none'}">Tag Törlése</button>
                 </div>
             </div>`;
@@ -797,7 +949,7 @@
             }
         }
 
-        /* ─── TABOK ÉS MODALOK ─── */
+        /* ─── TABS & MODALS NAVIGATION ─── */
         function switchTab(sectionId, btn) { 
             document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active')); 
             document.getElementById(sectionId).classList.add('active'); 
@@ -806,19 +958,22 @@
         }
         function openProfile(e, id) {
             if (isEditMode && (e.target.classList.contains('editable') || e.target.classList.contains('editable-active'))) return;
-            document.getElementById('md-' + id).classList.add('active'); 
-            document.body.style.overflow = 'hidden'; 
+            const targetModal = document.getElementById('md-' + id);
+            if (targetModal) {
+                targetModal.classList.add('active'); document.body.style.overflow = 'hidden'; 
+            }
         }
         function closeProfile(id) { 
-            document.getElementById('md-' + id).classList.remove('active'); 
-            document.body.style.overflow = 'auto'; 
+            const targetModal = document.getElementById('md-' + id);
+            if (targetModal) {
+                targetModal.classList.remove('active'); document.body.style.overflow = 'auto'; 
+            }
         }
         window.onclick = function(e) { 
             if (e.target.classList.contains('sub-page-overlay')) { 
                 e.target.classList.remove('active'); document.body.style.overflow = 'auto'; 
             } 
         }
-        function submitAppointment() { triggerToast("Foglalás beküldve!", true); }
     </script>
 </body>
 </html>
