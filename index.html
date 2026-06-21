@@ -655,9 +655,20 @@
         }
 
         async function adminDeleteUserFromPanel() {
-            if (currentLoggedInUser !== "admin") { triggerToast("Nincs admin jogosultságod!"); return; }
+            // Itt a javítás: vizsgáljuk, hogy a userneved "admin" VAGY van-e "admin" rangod
+            let myRoles = globalRoles[currentLoggedInUser] || [];
+            if (typeof myRoles === 'string') myRoles = [myRoles];
+            
+            const isAdmin = (currentLoggedInUser === "admin") || myRoles.includes("admin");
+
+            if (!isAdmin) { 
+                triggerToast("Nincs admin jogosultságod! (Admin rang szükséges)"); 
+                return; 
+            }
+            
             const target = document.getElementById('admin-delete-user').value;
             if (!target) { triggerToast("Válassz ki egy felhasználót a listából!"); return; }
+            
             if (confirm(`BIZTOSAN véglegesen törlöd a(z) ${target} nevű fiókot és minden adatát?`)) {
                 try {
                     await database.ref('users/' + target).remove();
