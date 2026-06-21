@@ -4,9 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kooperáció</title>
+    <head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Kooperáció</title>
+
+    
+
+    <link rel="icon" type="image/png" href="badge.png">
+
+    
+
+    <style>
+
+        /* ... a többi stílusod ... */
+
+    </style>
+
+</head>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <style>
         /* ─── TÉMA VÁLTOZÓK (Sötét/Világos mód támogatással) ─── */
@@ -381,6 +403,10 @@
             <span class="close-btn" onclick="closeProfileSettings()">&times;</span>
             <h2 style="color: var(--accent-color); margin-bottom: 25px; text-transform: uppercase;">Profil Beállítások</h2>
             <div class="form-field"><label>Profilkép URL (vagy fájlnév pl. pfp.jpg)</label><input type="text" class="form-input" id="setting-pfp-url" placeholder="pfp.jpg"></div>
+            <div class="form-field">
+                <label>Vagy tölts fel képet gépről:</label>
+                <input type="file" id="setting-file-upload" class="form-input" accept="image/*">
+            </div>
             <div class="form-field"><label>Új Felhasználónév</label><input type="text" class="form-input" id="setting-new-name"></div>
             <div class="form-field"><label>Új Jelszó</label><input type="password" class="form-input" id="setting-new-pass" placeholder="Hagyd üresen, ha nem módosítod"></div>
             <button class="submit-btn" onclick="saveUserSettings()">Adatok Mentése</button>
@@ -753,35 +779,47 @@
         }
         function closeProfileSettings() { document.getElementById('user-settings-modal').classList.remove('active'); }
 
-        function saveUserSettings() {
+/* ─── 3. PONT: HIBRID KÉPFELTÖLTÉS (Módosított Mentés Függvény) ─── */
+        async function saveUserSettings() {
             const newName = document.getElementById('setting-new-name').value.trim();
             const newPass = document.getElementById('setting-new-pass').value;
-            const newPfp = document.getElementById('setting-pfp-url').value.trim();
+            const linkInput = document.getElementById('setting-pfp-url').value.trim();
+            const fileInput = document.getElementById('setting-file-upload');
             
             if (!newName) { triggerToast("A név nem lehet üres!"); return; }
+
+// KÉP LOGIKA:
+    let finalPfpUrl = linkInput; // Alapból a linket használjuk
+
+    // Csak akkor töltünk fel, ha a felhasználó tényleg kiválasztott egy fájlt
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+        try {
+            triggerToast("Kép feltöltése folyamatban...", true);
+            const file = fileInput.files[0];
+            const storageRef = firebase.storage().ref('profiles/' + newName);
+            await storageRef.put(file);
+            finalPfpUrl = await storageRef.getDownloadURL(); // Ez lesz az új link
+        } catch (error) {
+            console.error("Feltöltési hiba:", error);
+            triggerToast("Hiba a kép feltöltésekor!");
+            return; // Megállítjuk a mentést, ha a feltöltés sikertelen
+        }
+    }
             
             const oldName = currentLoggedInUser;
-            
             if (oldName === "admin" && newName !== "admin") { triggerToast("Az admin fiók nevét nem módosíthatod!"); return; }
             
-            if (oldName !== "admin" && newName !== oldName) {
+            // Adatok mentése a Realtime Database-be
+            if (oldName !== newName) {
                 if (globalUsers[newName]) { triggerToast("Ez a név már foglalt!"); return; }
-                
                 let passToSave = newPass || globalUsers[oldName];
                 database.ref('users/' + newName).set(passToSave);
                 database.ref('users/' + oldName).remove();
-                
-                if (globalPfps[oldName] || newPfp) {
-                    database.ref('user_pfps/' + newName).set(newPfp || globalPfps[oldName]);
-                    database.ref('user_pfps/' + oldName).remove();
-                }
-                if (globalRoles[oldName]) {
-                    database.ref('user_roles/' + newName).set(globalRoles[oldName]);
-                    database.ref('user_roles/' + oldName).remove();
-                }
+                if (finalPfpUrl) database.ref('user_pfps/' + newName).set(finalPfpUrl);
+                if (globalRoles[oldName]) database.ref('user_roles/' + newName).set(globalRoles[oldName]);
             } else {
                 if (newPass) database.ref('users/' + oldName).set(newPass);
-                if (newPfp) database.ref('user_pfps/' + oldName).set(newPfp);
+                if (finalPfpUrl) database.ref('user_pfps/' + oldName).set(finalPfpUrl);
             }
             
             currentLoggedInUser = newName; 
